@@ -1,0 +1,426 @@
+{
+  "summary": {
+    "total_queries": 20,
+    "avg_response_time_seconds": 0.1427,
+    "max_response_time_seconds": 1.3466,
+    "avg_cosine_similarity": 0.5528,
+    "avg_precision_at_k": 0.0,
+    "avg_recall_at_k": 0.0,
+    "mrr": 0.0,
+    "passes_time_condition": true,
+    "passes_cosine_condition": false,
+    "passes_relevance_condition": false,
+    "hypothesis_h1_validated": false
+  },
+  "queries": [
+    {
+      "query_id": "q1",
+      "query": "proyectos de ley sobre medio ambiente",
+      "expected_boletines": [
+        "14751-06",
+        "14758-21",
+        "17325-33"
+      ],
+      "retrieved_boletines": [
+        "15790-12",
+        "13652-12",
+        "14213-12",
+        "13719-07",
+        "14805-12"
+      ],
+      "response_time_seconds": 1.3466,
+      "mean_cosine_top_k": 0.5669,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q2",
+      "query": "leyes relacionadas con protección ambiental y contaminación",
+      "expected_boletines": [
+        "14751-06",
+        "17325-33"
+      ],
+      "retrieved_boletines": [
+        "15790-12",
+        "16886-12",
+        "14575-06",
+        "15513-12",
+        "16335-14"
+      ],
+      "response_time_seconds": 0.0769,
+      "mean_cosine_top_k": 0.5646,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q3",
+      "query": "proyectos sobre salud pública",
+      "expected_boletines": [
+        "13570-03",
+        "13656-31",
+        "13432-07"
+      ],
+      "retrieved_boletines": [
+        "13738-07",
+        "14103-07",
+        "14213-12",
+        "13493-13",
+        "14505-11"
+      ],
+      "response_time_seconds": 0.0691,
+      "mean_cosine_top_k": 0.5325,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q4",
+      "query": "iniciativas sobre acceso a la salud y medicamentos",
+      "expected_boletines": [
+        "13570-03",
+        "13656-31"
+      ],
+      "retrieved_boletines": [
+        "16742-35",
+        "13738-07",
+        "16159-07",
+        "16214-14",
+        "14120-11"
+      ],
+      "response_time_seconds": 0.0779,
+      "mean_cosine_top_k": 0.5756,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q5",
+      "query": "proyectos sobre seguridad y justicia",
+      "expected_boletines": [
+        "17925-07",
+        "14084-29",
+        "16804-15"
+      ],
+      "retrieved_boletines": [
+        "14103-07",
+        "16827-07",
+        "16159-07",
+        "15772-25",
+        "16374-07"
+      ],
+      "response_time_seconds": 0.0731,
+      "mean_cosine_top_k": 0.5343,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q6",
+      "query": "leyes relacionadas con delitos y sistema judicial",
+      "expected_boletines": [
+        "17925-07",
+        "16804-15"
+      ],
+      "retrieved_boletines": [
+        "16159-07",
+        "15416-07",
+        "14762-07",
+        "16195-07",
+        "15606-07"
+      ],
+      "response_time_seconds": 0.061,
+      "mean_cosine_top_k": 0.5851,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q7",
+      "query": "proyectos sobre innovación tecnológica",
+      "expected_boletines": [
+        "17876-24",
+        "15565-07",
+        "16561-07"
+      ],
+      "retrieved_boletines": [
+        "14767-03",
+        "13471-07",
+        "16441-19",
+        "13582-07",
+        "13500-13"
+      ],
+      "response_time_seconds": 0.0437,
+      "mean_cosine_top_k": 0.4985,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q8",
+      "query": "leyes sobre transformación digital y tecnología",
+      "expected_boletines": [
+        "17876-24",
+        "16561-07"
+      ],
+      "retrieved_boletines": [
+        "14767-03",
+        "14448-03",
+        "16206-07",
+        "15884-15",
+        "14560-15"
+      ],
+      "response_time_seconds": 0.0517,
+      "mean_cosine_top_k": 0.5671,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q9",
+      "query": "proyectos sobre derechos fundamentales",
+      "expected_boletines": [
+        "17176-11",
+        "18120-17",
+        "14571-07"
+      ],
+      "retrieved_boletines": [
+        "14103-07",
+        "13571-07",
+        "13493-13",
+        "13582-07",
+        "13737-08"
+      ],
+      "response_time_seconds": 0.0461,
+      "mean_cosine_top_k": 0.5606,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q10",
+      "query": "leyes sobre derechos humanos y garantías constitucionales",
+      "expected_boletines": [
+        "17176-11",
+        "14571-07"
+      ],
+      "retrieved_boletines": [
+        "16159-07",
+        "17782-07",
+        "17258-07",
+        "17278-07",
+        "14103-07"
+      ],
+      "response_time_seconds": 0.084,
+      "mean_cosine_top_k": 0.5706,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q11",
+      "query": "proyectos sobre institucionalidad del estado",
+      "expected_boletines": [
+        "16524-07",
+        "15415-07",
+        "13451-07"
+      ],
+      "retrieved_boletines": [
+        "13582-07",
+        "14103-07",
+        "17165-04",
+        "15698-04",
+        "14839-06"
+      ],
+      "response_time_seconds": 0.0501,
+      "mean_cosine_top_k": 0.5248,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q12",
+      "query": "leyes sobre reformas del estado y administración pública",
+      "expected_boletines": [
+        "16524-07",
+        "13451-07"
+      ],
+      "retrieved_boletines": [
+        "15902-04",
+        "14839-06",
+        "16159-07",
+        "17640-06",
+        "17686-06"
+      ],
+      "response_time_seconds": 0.0586,
+      "mean_cosine_top_k": 0.5545,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q13",
+      "query": "proyectos de ley relacionados con empleo",
+      "expected_boletines": [
+        "15123-13",
+        "14987-13"
+      ],
+      "retrieved_boletines": [
+        "13500-13",
+        "13366-13",
+        "15163-13",
+        "16151-13",
+        "14103-07"
+      ],
+      "response_time_seconds": 0.0545,
+      "mean_cosine_top_k": 0.5676,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q14",
+      "query": "leyes sobre trabajo y condiciones laborales",
+      "expected_boletines": [
+        "15123-13"
+      ],
+      "retrieved_boletines": [
+        "14451-13",
+        "16151-13",
+        "17837-13",
+        "16191-13",
+        "17761-13"
+      ],
+      "response_time_seconds": 0.3831,
+      "mean_cosine_top_k": 0.5734,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q15",
+      "query": "proyectos sobre economía y finanzas",
+      "expected_boletines": [
+        "14012-05",
+        "13890-05"
+      ],
+      "retrieved_boletines": [
+        "14103-07",
+        "17322-03",
+        "13862-03",
+        "13571-07",
+        "13472-03"
+      ],
+      "response_time_seconds": 0.0819,
+      "mean_cosine_top_k": 0.5047,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q16",
+      "query": "leyes sobre regulación económica y mercado",
+      "expected_boletines": [
+        "14012-05"
+      ],
+      "retrieved_boletines": [
+        "17322-03",
+        "14532-15",
+        "16159-07",
+        "14817-07",
+        "14900-13"
+      ],
+      "response_time_seconds": 0.0571,
+      "mean_cosine_top_k": 0.5571,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q17",
+      "query": "proyectos sobre vivienda y urbanismo",
+      "expected_boletines": [
+        "15234-14",
+        "15321-14"
+      ],
+      "retrieved_boletines": [
+        "14213-12",
+        "17287-14",
+        "13717-14",
+        "14468-14",
+        "13571-07"
+      ],
+      "response_time_seconds": 0.051,
+      "mean_cosine_top_k": 0.5359,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q18",
+      "query": "leyes sobre planificación urbana y vivienda",
+      "expected_boletines": [
+        "15234-14"
+      ],
+      "retrieved_boletines": [
+        "17287-14",
+        "16159-07",
+        "14468-14",
+        "17006-01",
+        "17780-14"
+      ],
+      "response_time_seconds": 0.0488,
+      "mean_cosine_top_k": 0.5616,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q19",
+      "query": "proyectos sobre educación",
+      "expected_boletines": [
+        "14678-04",
+        "14700-04"
+      ],
+      "retrieved_boletines": [
+        "15698-04",
+        "13486-15",
+        "17169-04",
+        "16743-04",
+        "18141-07"
+      ],
+      "response_time_seconds": 0.0887,
+      "mean_cosine_top_k": 0.5264,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    },
+    {
+      "query_id": "q20",
+      "query": "leyes relacionadas con el sistema educativo",
+      "expected_boletines": [
+        "14678-04"
+      ],
+      "retrieved_boletines": [
+        "15698-04",
+        "15902-04",
+        "14736-04",
+        "16743-04",
+        "17295-04"
+      ],
+      "response_time_seconds": 0.0492,
+      "mean_cosine_top_k": 0.5952,
+      "precision_at_k": 0.0,
+      "recall_at_k": 0.0,
+      "reciprocal_rank": 0.0
+    }
+  ],
+  "criteria": {
+    "max_avg_time_seconds": 5.0,
+    "min_avg_cosine": 0.75,
+    "min_avg_precision_at_k": 0.6,
+    "top_k": 5,
+    "score_threshold": 0.35
+  }
+}

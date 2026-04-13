@@ -1,0 +1,17 @@
+# Comentario: Ignorar carpetas
+tesis/
+
+# Ignorar archivos específicos
+backend/.env
+backend/.env.example
+CLAUDE.md
+backend/evauation/results
+backend/evauation/boletines_qdrant.csv 
+backend/evauation/ground_truth_sample.jsonl
+backend/evauation/h1_queries.json
+
+
+
+# Ignorar extensiones de archivo
+*.log
+*.tmp
