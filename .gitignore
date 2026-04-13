@@ -5,10 +5,10 @@ tesis/
 backend/.env
 backend/.env.example
 CLAUDE.md
-backend/evauation/results
-backend/evauation/boletines_qdrant.csv 
-backend/evauation/ground_truth_sample.jsonl
-backend/evauation/h1_queries.json
+backend/evaluation/results/
+backend/evaluation/boletines_qdrant.csv
+backend/evaluation/ground_truth_sample.jsonl
+backend/evaluation/h1_queries.json
 
 
 
