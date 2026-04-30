@@ -1,0 +1,407 @@
+{
+  "h0": {
+    "hypothesis": "H0",
+    "description": "Evaluación jerárquica del clasificador basado en reglas: nivel 1 para categoría principal y nivel 2 para subcategorías.",
+    "model": "rule_based_classifier",
+    "dataset": {
+      "ground_truth_path": "/Users/cokke/Downloads/Proyecto_Completo_v3/backend/evaluation/ground_truth_to_label.jsonl",
+      "dataset_size": 15,
+      "primary_total_classes": 11,
+      "secondary_total_classes": 26,
+      "primary_classes": [
+        "DERECHOS_FUNDAMENTALES",
+        "DERECHO_LABORAL_EMPLEO",
+        "ECONOMIA_FINANZAS",
+        "EDUCACION",
+        "INSTITUCIONALIDAD_ESTADO",
+        "POR_CLASIFICAR",
+        "SALUD_PUBLICA",
+        "SEGURIDAD_JUSTICIA",
+        "TECNOLOGIA_INNOVACION",
+        "TRANSPORTE",
+        "VIVIENDA_URBANISMO"
+      ],
+      "secondary_classes": [
+        "CAMBIO_CLIMATICO",
+        "COBERTURA_SANITARIA",
+        "CONTAMINACION_RESIDUOS",
+        "CONTRATOS_LABORALES",
+        "DATOS_PERSONALES",
+        "DELITOS_PENAS",
+        "DERECHOS_INFANCIA",
+        "DESCENTRALIZACION",
+        "EDUCACION_ESCOLAR",
+        "GESTION_PUBLICA",
+        "IGUALDAD_NO_DISCRIMINACION",
+        "LIBERTADES_CIVILES",
+        "ORDEN_SEGURIDAD",
+        "PYMES_EMPRENDIMIENTO",
+        "REFORMA_CONSTITUCIONAL",
+        "REGULACION_OPERATIVA",
+        "SALUD_OCUPACIONAL",
+        "SEGURIDAD_VIAL",
+        "SERVICIOS_BASICOS",
+        "SINDICALISMO",
+        "SISTEMA_ELECTORAL",
+        "TELECOMUNICACIONES",
+        "TRANSPARENCIA_PROBIDAD",
+        "TRANSPORTE_AEREO_MARITIMO",
+        "TRANSPORTE_PUBLICO",
+        "TRIBUTACION"
+      ],
+      "imbalance_ratio_labels": 4.0
+    },
+    "configuration": {
+      "primary_threshold": 0.3,
+      "subcategory_threshold": 1.0,
+      "max_secondary_labels": 5
+    },
+    "metrics": {
+      "primary_category": {
+        "accuracy": 0.4,
+        "precision_macro": 0.3939,
+        "recall_macro": 0.2606,
+        "f1_macro": 0.2909,
+        "precision_weighted": 0.7778,
+        "recall_weighted": 0.4,
+        "f1_weighted": 0.48,
+        "per_class": {
+          "DERECHOS_FUNDAMENTALES": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "support": 2
+          },
+          "DERECHO_LABORAL_EMPLEO": {
+            "precision": 1.0,
+            "recall": 0.2,
+            "f1": 0.3333,
+            "support": 5
+          },
+          "ECONOMIA_FINANZAS": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "EDUCACION": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "INSTITUCIONALIDAD_ESTADO": {
+            "precision": 0.3333,
+            "recall": 0.5,
+            "f1": 0.4,
+            "support": 2
+          },
+          "POR_CLASIFICAR": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "SALUD_PUBLICA": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "SEGURIDAD_JUSTICIA": {
+            "precision": 1.0,
+            "recall": 0.6667,
+            "f1": 0.8,
+            "support": 3
+          },
+          "TECNOLOGIA_INNOVACION": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "TRANSPORTE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 1
+          },
+          "VIVIENDA_URBANISMO": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          }
+        },
+        "support": {
+          "SEGURIDAD_JUSTICIA": 3,
+          "DERECHO_LABORAL_EMPLEO": 5,
+          "INSTITUCIONALIDAD_ESTADO": 2,
+          "ECONOMIA_FINANZAS": 1,
+          "TRANSPORTE": 1,
+          "TECNOLOGIA_INNOVACION": 1,
+          "DERECHOS_FUNDAMENTALES": 2
+        }
+      },
+      "secondary_labels": {
+        "accuracy_subset": 0.2667,
+        "hamming_loss": 0.0923,
+        "precision_micro": 0.5,
+        "recall_micro": 0.1944,
+        "f1_micro": 0.28,
+        "precision_macro": 0.2115,
+        "recall_macro": 0.1603,
+        "f1_macro": 0.1667,
+        "precision_weighted": 0.3472,
+        "recall_weighted": 0.1944,
+        "f1_weighted": 0.2315,
+        "per_class": {
+          "CAMBIO_CLIMATICO": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "COBERTURA_SANITARIA": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "CONTAMINACION_RESIDUOS": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "CONTRATOS_LABORALES": {
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "DATOS_PERSONALES": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "DELITOS_PENAS": {
+            "precision": 1.0,
+            "recall": 0.5,
+            "f1": 0.6667,
+            "support": 4
+          },
+          "DERECHOS_INFANCIA": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "DESCENTRALIZACION": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "EDUCACION_ESCOLAR": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "GESTION_PUBLICA": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "IGUALDAD_NO_DISCRIMINACION": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "LIBERTADES_CIVILES": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 1
+          },
+          "ORDEN_SEGURIDAD": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "PYMES_EMPRENDIMIENTO": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "REFORMA_CONSTITUCIONAL": {
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "support": 3
+          },
+          "REGULACION_OPERATIVA": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "SALUD_OCUPACIONAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 4
+          },
+          "SEGURIDAD_VIAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 2
+          },
+          "SERVICIOS_BASICOS": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "SINDICALISMO": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "SISTEMA_ELECTORAL": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "TELECOMUNICACIONES": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          },
+          "TRANSPARENCIA_PROBIDAD": {
+            "precision": 0.5,
+            "recall": 1.0,
+            "f1": 0.6667,
+            "support": 1
+          },
+          "TRANSPORTE_AEREO_MARITIMO": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 0
+          },
+          "TRANSPORTE_PUBLICO": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 1
+          },
+          "TRIBUTACION": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 1
+          }
+        },
+        "support": {
+          "CAMBIO_CLIMATICO": 1,
+          "COBERTURA_SANITARIA": 2,
+          "CONTAMINACION_RESIDUOS": 1,
+          "CONTRATOS_LABORALES": 3,
+          "DATOS_PERSONALES": 2,
+          "DELITOS_PENAS": 4,
+          "DERECHOS_INFANCIA": 0,
+          "DESCENTRALIZACION": 1,
+          "EDUCACION_ESCOLAR": 2,
+          "GESTION_PUBLICA": 1,
+          "IGUALDAD_NO_DISCRIMINACION": 1,
+          "LIBERTADES_CIVILES": 1,
+          "ORDEN_SEGURIDAD": 1,
+          "PYMES_EMPRENDIMIENTO": 1,
+          "REFORMA_CONSTITUCIONAL": 3,
+          "REGULACION_OPERATIVA": 1,
+          "SALUD_OCUPACIONAL": 4,
+          "SEGURIDAD_VIAL": 2,
+          "SERVICIOS_BASICOS": 0,
+          "SINDICALISMO": 1,
+          "SISTEMA_ELECTORAL": 0,
+          "TELECOMUNICACIONES": 1,
+          "TRANSPARENCIA_PROBIDAD": 1,
+          "TRANSPORTE_AEREO_MARITIMO": 0,
+          "TRANSPORTE_PUBLICO": 1,
+          "TRIBUTACION": 1
+        }
+      }
+    },
+    "timing": {
+      "total_execution_seconds": 0.0497,
+      "average_seconds_per_document": 0.0033,
+      "median_seconds_per_document": 0.0032,
+      "max_seconds_per_document": 0.0061
+    },
+    "hypothesis_test": {
+      "metric": "secondary_labels.f1_weighted",
+      "observed_value": 0.2315,
+      "threshold": 0.7,
+      "result": "rejected"
+    },
+    "artifacts": {
+      "predictions_file": "/Users/cokke/Downloads/Proyecto_Completo_v3/results/predictions_rules_h0_hierarchical.jsonl"
+    },
+    "notes": "La categoría principal se evalúa por separado de las subcategorías. Si labels incluye también la categoría principal, esta se elimina automáticamente para la medición del nivel secundario."
+  },
+  "h1": {
+    "hypothesis": "H1",
+    "description": "La implementación de una arquitectura de búsqueda semántica basada en una base de datos vectorial (Qdrant) permitirá recuperar resultados relevantes en tiempos inferiores a 5 segundos, manteniendo una similitud de coseno promedio superior a 0.75 en las consultas.",
+    "system": "semantic_search_qdrant",
+    "dataset": {
+      "ground_truth_path": "/Users/cokke/Downloads/Proyecto_Completo_v3/backend/evaluation/ground_truth_to_label.jsonl",
+      "dataset_size": 15
+    },
+    "configuration": {
+      "top_k": 5,
+      "score_threshold": 0.4
+    },
+    "metrics": {
+      "mean_latency_seconds": 0.1184,
+      "median_latency_seconds": 0.0668,
+      "max_latency_seconds": 0.8209,
+      "total_execution_seconds": 2.4202,
+      "mean_cosine_similarity_top1": 1.0,
+      "recall_at_1": 1.0,
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "recall_at_k": 1.0,
+      "mean_reciprocal_rank": 1.0
+    },
+    "hypothesis_test": {
+      "latency_condition": {
+        "observed_value": 0.1184,
+        "threshold": 5.0,
+        "operator": "<",
+        "passed": true
+      },
+      "cosine_condition": {
+        "observed_value": 1.0,
+        "threshold": 0.75,
+        "operator": ">",
+        "passed": true
+      },
+      "result": "accepted"
+    },
+    "artifacts": {
+      "retrieval_file": "/Users/cokke/Downloads/Proyecto_Completo_v3/results/retrieval_h1_details.jsonl"
+    },
+    "notes": "Esta evaluación usa la suma del proyecto como consulta y considera relevante la recuperación del mismo boletín. Si luego creas un archivo específico de consultas H1, puedes hacer la evaluación aún más sólida."
+  }
+}

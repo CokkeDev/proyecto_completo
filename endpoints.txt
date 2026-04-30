@@ -1,0 +1,5438 @@
+openapi: 3.0.0
+servers:
+  - description: localhost (uso local)
+    url: http://localhost:4209/v3
+  - description: restsil-ventanillaunica
+    url: https://restsil-ventanillaunica.senado.cl/v3
+  - description: Servidor Desarrollo bd dbsil
+    url: https://restsil-dev.senado.cl/v3
+  - description: Servidor Desarrollo bd silclon
+    url: https://restsil-pres.senado.cl/v3
+  - description: QA
+    url: https://restsil-qa.senado.cl/v3
+  - description: Produccion
+    url: https://restsil.senado.cl/v3
+info:
+  description: APIs del ámbito legislativo que atienden a distintas aplicaciones tanto del Senado como externas.  La documentación se iniciará con aquellos endpoints involucrados en el portal senadores y a los que se les cree la versión 2.
+  version: "3.0.0"
+  title: REST SIL
+security:
+  - ApiKeyAuth: [] 
+tags:
+  - name: parlamentarios
+  - name: sesiones
+  - name: comisiones
+  - name: institucion
+  - name: proyectos
+  - name: asuntos
+  - name: estadisticas 
+  - name: ventanilla-unica
+  - name: congreso
+  - name: ventanilla-unica
+  - name: congreso
+  - name: oficios-y-antecedentes
+  - name: votaciones
+  - name: busqueda-semantica
+paths:
+  /parlamentarios:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener parlamentarios
+      operationId: getParlamentarios
+      description: |
+        Entrega un listado de parlamentarias o parlamentarios según los parámetros ingresados  
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - in: query
+          name: region_id
+          schema:
+            type: number
+          required: false
+        - in: query
+          name: circunscripcion_id
+          schema:
+            type: number
+          required: false
+        - in: query
+          name: comite_id
+          schema:
+            type: number
+          required: false
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: apellido_paterno
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: apellido_materno
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: camara
+          required: false
+          schema:
+            type: string
+            enum: 
+            - null
+            - D
+            - S
+
+            default: null
+          description: >
+            Tipo de cámara:
+             * null - Retorna de ambas cámaras
+             * `D` - Retorna solo diputadas y diputados
+             * `S` - Retorna solo senadoras y senadores
+        - in: query
+          name: vigentes
+          schema:
+            type: number
+            enum: 
+            - null
+            - 0
+            - 1
+            default: null
+          description: >
+            Parlamentarios vigentes o anteriores
+             * null - Parlamentarios y parlamentarias de sexo masculino y femenino
+             * `0` - Solo Parlamentarias o Parlamentarios que hayan ejercido en algún periodo anterior
+             * `1` - Solo Parlamentarias o Parlamentarios que ejerzan el periodo actual
+          required: false
+        - in: query
+          name: periodo_desde
+          description: los años van de 4 en 4 desde 1990
+          schema:
+            type: number
+          example: 2014
+          required: false
+        - in: query
+          name: periodo_hasta
+          description: los años van de 4 en 4 desde 1994
+          schema:
+            type: number
+          example: 2018
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - in: query
+          name: sexo
+          required: false
+          schema:
+            type: string
+            enum: 
+            - null
+            - 1
+            - 2 
+            default: null
+          description: >
+            Sexo del parlamentario o parlamentaria:
+             * null - Parlamentarios y parlamentarias de sexo masculino y femenino
+             * `1` - Solo Parlamentarios de sexo femenino
+             * `2` - Solo Parlamentarios de sexo masculino
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Parlamentario"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /regiones:
+    get:
+      tags:
+        - regiones
+      summary: Obtener regiones
+      operationId: getRegiones
+      description: |
+        Entrega un listado de regiones  
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/asistencia_sala:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener asistencia a Sala de Senadores. Por ahora SORT solo admite fecha asc o desc
+      operationId: getAsistenciaSala
+      description: |
+        Obtener asistencia a Sala de Senadores -----> Por ahora SORT solo admite fecha asc o desc |
+        Debe ir id_legislatura o mes y/o ano
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/asistencia_comisiones:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener asistencia a comisiones de Senadores
+      operationId: getAsistenciaComisiones
+      description: |
+        Obtener asistencia a comisiones de Senadores
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/mociones:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de mociones de parlamentarios
+      operationId: getMocionesParlamentarios
+      description: |
+        Obtener listado de mociones de parlamentarios
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/mociones_inadmisibles:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de mociones inadmisibles de senadores
+      operationId: getMocionesInadmisiblesParlamentarios
+      description: |
+        Obtener listado de mociones inadmisibles de parlamentarios
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/asuntos:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de asuntos S de parlamentarios
+      operationId: getAsuntosParlamentarios
+      description: |
+        Obtener listado de asuntos S de parlamentarios
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/oficios_antecedentes:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de oficios de antecedentes (o incidentes) de senadores
+      operationId: getOficiosAntecedentesSenadores
+      description: |
+        Obtener listado de oficios de antecedentes de senadores 
+      parameters:
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/palabra_clave'
+        - in: query
+          name: nro_oficio
+          description: numero del oficio
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/cargos:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de cargos de senadores
+      operationId: getCargosSenadores
+      description: |
+        Obtener listado de cargos senadores 
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/enlaces:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener enlaces a ... 
+      operationId: getEnlacesSenadores
+      description: |
+        Obtener listado de herramientas
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/intervenciones_transcritas:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de intervenciones transcritas de senadores
+      operationId: getIntervencionesTranscritasSenadores
+      description: |
+        Obtener listado de intervenciones transcritas de senadores. El campo "asunto" cuando es 1 indica que es un asunto S y el campo "id_asunto" tendra valor
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/intervenciones_video:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de intervenciones transcritas de senadores
+      operationId: getIntervencionesVideoSenadores
+      description: |
+        Obtener listado de intervenciones transcritas de senadores
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/fotos:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener fotos de senadores
+      operationId: getFotoParlamentario
+      description: |
+        Obtener fotos de senadores
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - in: query
+          name: tamano
+          description: define formato de la foto solicitada 200=200x330 u 80=80x80
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/comisiones:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de comiones que integra o ha integrado senador(a)
+      operationId: getComisionesSenadores
+      description: |
+        Obtener listado de comisiones que integra o ha integrado senador(a). OBS ----> falta corregir periodos de la consulta
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/uuidParam'
+        - $ref: '#/components/parameters/slugParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - in: query
+          name: vigentes
+          schema:
+            type: number
+            enum:
+            - null
+            - 0
+            - 1
+            default: null
+          description: >
+            Comisiones vigentes o anteriores
+             * null - todas
+             * `0` - Solo anteriores
+             * `1` - Solo actuales
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/comites:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de comites vigentes. 
+      operationId: getComites
+      description: |
+        Obtener listado de comites
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/logo_comite:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener logo de comites
+      operationId: getLogoComite
+      description: |
+        Obtener logo de comites
+      parameters:
+        - in: query
+          name: id_comite
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/comites_reuniones:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de reuniones de comites
+      operationId: getReunionesComites
+      description: |
+        Obtener listado de reuniones de comites
+      parameters:
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /parlamentarios/mesa:
+    get:
+      tags:
+        - parlamentarios
+      summary: Obtener listado de integrantes de la Mesa del Senado
+      operationId: getMesa
+      description: |
+        Obtener listado de integrantes de la mesa del Senado
+      parameters:
+        - in: query
+          name: vigentes
+          schema:
+            type: number
+            enum:
+            - null
+            - 0
+            - 1
+            default: null
+          description: >
+            mesa vigente o historicas
+             * null - todas
+             * `0` - Solo anteriores
+             * `1` - Solo actuales
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Region"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /legislaturas:
+    get:
+      tags:
+        - sesiones
+      summary: Obtener legislaturas
+      operationId: getLegislaturas
+      description: |
+        Entrega listado de legislaturas
+      parameters:
+        - in: query
+          name: id_legislatura
+          schema:
+            type: number
+            default: null
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones:
+    get:
+      tags:
+        - sesiones
+      summary: lista sesiones de sala 
+      operationId: sesiones
+      description:
+        lista sesiones de sala 
+      parameters:
+        - in: query
+          name: id_sesion
+          description:    9479 QA
+          schema:
+            type: number
+            default: null
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /listado_diarios:
+    get:
+      tags:
+        - sesiones
+      summary: lista de diarios de sesiones de sala 
+      operationId: listadoDiariosSesiones
+      description:
+        lista diarios de sesiones de sala 
+      parameters:
+        - in: query
+          name: id_sesion
+          description:    9479 QA
+          schema:
+            type: number
+            default: null
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /ultimas_sesiones:
+    get:
+      tags:
+        - sesiones
+      summary: Obtener últimas sesiones
+      operationId: getUltimasSesiones
+      description: |
+        Entrega listado de las últimas sesiones de sala
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /plazos_indicaciones:
+    get:
+      tags:
+        - sesiones
+      summary: lista plazos para presentar indicaciones
+      operationId: getPlazosIndicaciones
+      description:
+        lista de plazos para presentar indicaciones en Secretaria o Comisiones
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /votaciones:
+    get:
+      tags:
+        - sesiones
+      summary: lista de votaciones en sala 
+      operationId: getVotacionesSala
+      description:
+        lista de votaciones en sala 
+      parameters:
+        - in: query
+          name: id_votacion
+          schema:
+            type: number
+            default: null
+        - in: query
+          name: id_sesion
+          description:    9479 QA
+          schema:
+            type: number
+            default: null
+        - in: query
+          name: boletin
+          schema:
+            type: string
+            default: null
+        - in: query
+          name: palabra_clave
+          description: palabra clave
+          schema:
+            type: string
+          required: false 
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /tabla_semanal:
+    get:
+      tags:
+        - sesiones
+      summary: lista de sesiones de la semana
+      operationId: getTablaSemanal
+      description:
+        lista de sesiones de la semana y su detalle
+      parameters:
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /tabla_documento:
+    get:
+      tags:
+        - sesiones
+      summary: documento de tabla de sesion
+      operationId: getTablaeDocumento
+      description:
+        documento de la tabla de una sesion
+      parameters:
+        - in: query
+          name: id_sesion
+          description:    9479 QA
+          schema:
+            type: number
+            default: null
+          required: true            
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /puntos_tabla:
+    get:
+      tags:
+        - sesiones
+      summary: tabla de la sesion indicada
+      operationId: getTablaSesion
+      description:
+        tabla de la sesion solicitada
+      parameters:
+        - in: query
+          name: id_sesion
+          schema:
+            type: number
+          required: true
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /puntos_tabla_con_total_por_documento:
+    get:
+      tags:
+        - sesiones
+      summary: tabla de la sesion indicada con total de documentos por punto
+      operationId: getTablaSesionTotalPorDocumento
+      description:
+        tabla de la sesion solicitada con total de documentos por punto
+      parameters:
+        - $ref: '#/components/parameters/idSesionParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /cuenta:
+    get:
+      tags:
+        - sesiones
+      summary: cuenta de la sesion indicada en version documento
+      operationId: getCuenta
+      description:
+        cuenta de la sesion solicitada en su version documento
+      parameters:
+        - in: query
+          name: id_sesion
+          description: 9479 QA
+          schema:
+            type: number
+          required: true
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /resumen:
+    get:
+      tags:
+        - sesiones
+      summary: resumen de la sesion indicada en version documento
+      operationId: getResumen
+      description:
+        resumen de la sesion solicitada en su version documento
+      parameters:
+        - in: query
+          name: id_sesion
+          description: usar como ejemplo 9577 , 9240 QA
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: tipo
+          description:  menu - para obtener menu del resumen  | resumen - para obtener el texto del resumen
+          schema:
+            type: string
+          required: true
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /diario:
+    get:
+      tags:
+        - sesiones
+      summary: diario de la sesion indicada en version documento
+      operationId: getDiario
+      description:
+        diario de la sesion solicitada en su version documento
+      parameters:
+        - in: query
+          name: id_sesion
+          description: usar como ejemplo 9557  prod - 9479 QA
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: tipo
+          description:  menu - para obtener menu del resumen  | diario - para obtener el texto del diario
+          schema:
+            type: string
+          required: true
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /mociones_inadmisibles:
+    get:
+      tags:
+        - sesiones
+      summary: mociones inadmisibles
+      operationId: getMocionesInadmisibles
+      description:
+        mociones inadmisibles
+      parameters:
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones/asistencia:
+    get:
+      tags:
+        - sesiones
+      summary: asistencia a sesiones de sala
+      operationId: getAsistenciaSala
+      description:
+        asistencia a sesiones de sala. En este endpoint se puso un limit de 60, si no se indica, para listar a todos los senadores en una sola pagina.
+      parameters:
+        - in: query
+          name: id_sesion
+          description: usar como ejemplo 9577 , 9240 QA
+          schema:
+            type: number
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones/intervenciones_transcritas:
+    get:
+      tags:
+        - sesiones
+      summary: lista intervenciones transcritas de sesion
+      operationId: getIntervencionesSesion
+      description: 
+        lista intervenciones transcritas de una sesión. Usar como ejemplo 9577 , 9240 QA
+      parameters:
+        - in: query
+          name: id_sesion
+          description: usar como ejemplo 9577 , 9240 QA
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones/intervenciones_video:
+    get:
+      tags:
+        - sesiones
+      summary: lista intervenciones en video de sesion
+      operationId: getIntervencionesVideoSesion
+      description:
+        lista intervenciones en video de una sesión
+      parameters:
+        - in: query
+          name: id_sesion
+          description: usar como ejemplo 9577 , 9240 QA
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: orador
+          description: "usar elementos separados por coma usando los comodines % y/o ?. Ejemplo: %Espina%,%quinteros%"
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones/intervencion:
+    get:
+      tags:
+        - sesiones
+      summary: obtiene texto de intervencion
+      operationId: getTextoIntercencion
+      description:
+        obtiene texto de intervencion. Se indica tipo de orador, que puede ser Senador, Diputado, Ministerio, Otra Autoridad
+      parameters:
+        - in: query
+          name: id_sesion
+          description: usar como ejemplo 9577 , 9240 QA
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: tag
+          description: marcador de la intervencion solicitada, entregada por endpoint sesiones/intervenciones_transcritas
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones/ultimos_materias_tratadas:
+    get:
+      tags:
+        - sesiones
+      summary: Entrega informacion resumen de proyecto
+      operationId: ultimos_materias_tratadas
+      description: Entrega informacion  resumen de proyecto
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /sesiones/asuntos_reglamentarios:
+    get:
+      tags:
+        - sesiones
+      summary: lista asuntos reglamentarios de sesiones
+      parameters:
+        - $ref: '#/components/parameters/idLegislaturaParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /sesiones/asunto_reglamentario:
+    get:
+      tags:
+        - sesiones
+      summary: asunto reglamentario de sesion
+      operationId: asunto_reglamentario
+      description: asunto reglamentario de sesion
+      parameters:
+        - in: query
+          name: id_texto_sesion
+          description: usar como ejemplo 75264 QA
+          schema:
+            type: number
+          required: true
+        - in: query
+          name: id_tag
+          description: usar como ejemplo 17 QA
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones/lista_pareos:
+    get:
+      tags:
+        - sesiones
+      summary: lista de pareos
+      operationId: getListaPareos
+      description: lista de pareos
+      parameters:
+        - $ref: '#/components/parameters/idSesionParam'
+        - $ref: '#/components/parameters/fechaHoraInicioParam'
+        - $ref: '#/components/parameters/fechaHoraFinParam'
+        - $ref: '#/components/parameters/listaParlamentariosParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /sesiones/lista_permisos:
+    get:
+      tags:
+        - sesiones
+      summary: lista de permisos
+      operationId: getListaPermisos
+      description: lista de permisos
+      parameters:
+        - $ref: '#/components/parameters/idSesionParam'
+        - $ref: '#/components/parameters/fechaHoraInicioParam'
+        - $ref: '#/components/parameters/fechaHoraFinParam'
+        - $ref: '#/components/parameters/listaParlamentariosParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Permiso"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comisiones/{id_comision}:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener comisiones
+      operationId: getComisiones
+      description: |
+        Entrega un listado de comisiones
+      parameters:
+        - in: path
+          name: id_comision
+          description: identificador de comision
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: camara
+          required: false
+          schema:
+            type: string
+            enum: 
+            - null
+            - D
+            - S
+
+            default: null
+          description: >
+            Tipo de cámara:
+             * null - Retorna de ambas cámaras
+             * `D` - Retorna solo diputadas y diputados
+             * `S` - Retorna solo senadoras y senadores
+            default: null
+        - in: query
+          name: tipo_id
+          schema:
+            type: number
+            enum: 
+            - null
+            - 10
+            - 11
+            - 12
+            - 13
+            - 14
+            default: null
+          description: >
+            Tipos de comisiones:
+             * null - todas
+             * `10` - Solo comisiones permanentes
+             * `11` - Solo comisiones mixtas
+             * `12` - Solo comisiones unidas
+             * `13` - Solo comisiones especiales
+             * `14` - Solo subcomisiones de presupuesto
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_listado:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de comisiones
+      operationId: getListadoComisiones
+      description: |
+        Entrega un listado de comisiones. Salvo comisiones permanentes y subcomisiones de presupuesto (10 y 14) las demas se muestran por actividad por legislaura. Si esta no sse indica se toma la vigente.
+      parameters:
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: id_legislatura
+          schema:
+            type: number
+          required: false
+        - in: query
+          name: tipo_id
+          schema:
+            type: number
+            enum: 
+            - null
+            - 10
+            - 11
+            - 12
+            - 13
+            - 14
+            default: null
+          description: >
+            Tipos de comisiones:
+             * null - todas
+             * `10` - Solo comisiones permanentes
+             * `11` - Solo comisiones mixtas
+             * `12` - Solo comisiones unidas
+             * `13` - Solo comisiones especiales
+             * `14` - Solo subcomisiones de presupuesto
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_listado_portal_legislativo:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de comisiones
+      operationId: getListadoComisionesPortalLegislativo
+      description: |
+        Entrega un listado de comisiones. 
+      parameters:
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: id_legislatura
+          schema:
+            type: number
+          required: false
+        - in: query
+          name: tipo_id
+          schema:
+            type: number
+            enum: 
+            - null
+            - 10
+            - 11
+            - 12
+            - 13
+            - 14
+            default: null
+          description: >
+            Tipos de comisiones:
+             * null - todas
+             * `10` - Solo comisiones permanentes
+             * `11` - Solo comisiones mixtas
+             * `12` - Solo comisiones unidas
+             * `13` - Solo comisiones especiales
+             * `14` - Solo subcomisiones de presupuesto
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_materias:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de ultimas materias tratadas en comisiones
+      operationId: getMateriasComisiones
+      description: |
+        Entrega un listado de ultimas materias tratadas en comisiones. El campo "asunto" cuando es 1 indica que es un asunto S y el campo "id_asunto" tendra valor
+      parameters:
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_citaciones:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de citaciones
+      operationId: getCitacionesComisiones
+      description: |
+        Entrega listado de citaciones de comisiones (futuras, desde hoy). El parámetro sort acepta únicamente el valor "fecha".
+      parameters:
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+          description: ID de la comisión
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: false
+          description: UUID de la comisión
+        - in: query
+          name: descripcion
+          schema:
+            type: string
+          required: false
+          description: Filtra por nombre de comisión (búsqueda parcial case-insensitive)
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CitacionComision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_citaciones_portal_legislativo:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de citaciones para portal legislativo
+      operationId: getCitacionesComisionPortalLegislativo
+      description: |
+        Entrega listado de citaciones de comisiones para el portal legislativo. Admite exportación en PDF o Excel mediante el parámetro export.
+      parameters:
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: descripcion
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/idTipoComisionParam'
+        - in: query
+          name: export
+          schema:
+            type: string
+            enum: [pdf, excel]
+          required: false
+          description: Si se especifica, devuelve el resultado en PDF o Excel en lugar de JSON
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio (JSON, PDF o Excel según parámetro export)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CitacionComision"
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+              description: Exportación en PDF (cuando export=pdf)
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+              description: Exportación en Excel (cuando export=excel)
+        "404":
+          description: No hay datos para exportar (cuando se usa export y no hay resultados)
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_resultados:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado ultimas sesiones y actividades de comisiones
+      operationId: getUltimasSesionesComisiones
+      description: |
+        Entrega listado ultimas sesiones y actividades de comisiones
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResultadoComision"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_sesiones:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de sesiones de comisiones de acuerdo a criterios
+      operationId: getSesionesComisiones
+      description: |
+        Entrega listado sesiones de comisiones de acuerdo a criterios
+      parameters:
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/idTipoComisionParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_sesiones_todas:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de sesiones de comisiones incluidas las no publicadas
+      operationId: getSesionesComisionesTodas
+      description: |
+        Entrega listado sesiones de comisiones de acuerdo a criterios incluidas las no publicadas
+      parameters:
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/idTipoComisionParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_actividades:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de actividades de comisiones
+      operationId: getActividadesComisiones
+      description: |
+        Entrega listado actividades de comisiones
+      parameters:
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_informes:
+    get:
+      tags:
+        - comisiones
+      summary: Obtener listado de informes de comisiones
+      operationId: getInformesComisiones
+      description: |
+        Entrega listado informes de comisiones. El campo "asunto" cuando es 1 indica que es un asunto S y el campo "id_asunto" tendra valor
+      parameters:
+        - in: query
+          name: nombre
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_integrantes:
+    get:
+      tags:
+        - comisiones
+      summary: Obtiene listado de parlamentarios integrantes de la comision
+      operationId: getIntegrantesComisiones
+      description: |
+        Obtiene listado de parlamentarios integrantes de comisiones
+      parameters:
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_secretaria:
+    get:
+      tags:
+        - comisiones
+      summary: Obtiene listado de funcionarios de la secretaría de la comision
+      operationId: getSecretariaComision
+      description: |
+        Obtiene listado de funcionarios de la secretaría de la comision
+      parameters:
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: false
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_resumen:
+    get:
+      tags:
+        - comisiones
+      summary: Obtiene resumen de actividad de la comision
+      operationId: getResumenComisiones
+      description: |
+        Obtiene resumen de actividad de la comision
+      parameters:
+        - in: query
+          name: id_comision
+          schema:
+            type: number
+          required: true
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comision_sesion:
+    get:
+      tags:
+        - comisiones
+      summary: Obtiene detalle de sesion de comision
+      operationId: getDetalleSesionComision
+      description: |
+        Obtiene detalle de sesion de comision
+      parameters:
+        - in: query
+          name: id_sesion
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /comisiones_usuario:
+    get:
+      tags:
+        - comisiones
+      summary: Obtiene listado de comisiones de funcionario dado rut
+      operationId: getComisionesUsuario
+      description: |
+        Obtiene listado de comisiones de funcionario dado rut
+      parameters:
+        - in: query
+          name: rut
+          schema:
+            type: number
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /hemiciclo:
+    get:
+      tags:
+        - institucion
+      summary: Obtiene ubicacion de parlamentarios en hemiciclo
+      operationId: getHemiciclo
+      description: |
+        Obtiene ubicacion de parlamentarios en hemiciclo. Primer grupo, centro, segundom lado izq y tercero, lado derecho
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+          content:
+            application/json:
+              schema:
+                type: array
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /autoridades_administrativas:
+    get:
+      tags:
+        - institucion
+      summary: Entrega las autoridades administrativas del Senado
+      operationId: getAutoridadesAdministrativas
+      description:  Trae las autoridades administrativas actuales del Senado
+      parameters:
+        - in: query
+          name: vigentes
+          description: indica si se traeran los vigentes o los historicos 1-vigentes   0-historicos  undefined-Todos
+          required: false
+          schema:
+            type: string                
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /proyectos:
+    get:
+      tags:
+        - proyectos
+      summary: Entrega listado de proyectos de ley
+      operationId: getProyectosLey
+      description: Entrega listado de proyectos de ley
+      parameters:
+        - in: query
+          name: palabra_clave
+          description: palabra clave
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: boletin
+          description: numero de boletin del proyecto
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /leyes_publicadas:
+    get:
+      tags:
+        - proyectos
+      summary: Entrega listado de leyes publicadas
+      operationId: getLeyesPublicadas
+      description: |
+        # Entrega listado de leyes publicadas
+        ### Parametro de ordenamiento posible
+        #### -id_proyecto
+        #### -boletin 
+        #### -titulo
+        #### -numero_ley
+        #### -fecha_ingreso
+        #### -fecha_publicacion
+      parameters:
+        - in: query
+          name: palabra_clave
+          description: palabra clave
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: numero_ley
+          description: numero de la ley o decreto
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /info_proyecto_resumen:
+    get:
+      tags:
+        - proyectos
+      summary: Entrega informacion resumen de proyecto
+      operationId: getInfoResumenProyecto
+      description: Entrega informacion  resumen de proyecto
+      parameters:
+        - in: query
+          name: id_proyecto
+          description: id del proyecto
+          schema:
+            type: integer
+          required: false
+        - in: query
+          name: boletin
+          description: numero de boletin del proyecto
+          schema:
+            type: string
+          required: false
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /llamada_api_camara:
+    get:
+      tags:
+        - proyectos
+      summary: Llamada a api de camara
+      operationId: getLlamadaApiCamara
+      description: Llamada a api de camara
+      parameters:
+        - in: query
+          name: id_proyecto
+          description: id del proyecto
+          schema:
+            type: integer
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /asuntos:
+    get:
+      tags:
+        - asuntos
+      summary: Entrega listado de asuntos exclusivos del Senado (asunto S)
+      operationId: getAsuntos
+      description: Entrega listado de asuntos exclusivos del Senado, si se indica id de asunto muestra detalle del mismo
+      parameters:
+        - in: query
+          name: palabra_clave
+          description: palabra clave
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: boletin
+          description: número de boletin del asunto
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: id_materia
+          required: false
+          schema:
+            type: integer
+            enum: 
+            - null
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+            - 7
+            - 8
+            - 9
+            - 10
+            - 11
+            - 12
+            - 13
+            - 14
+
+            default: null
+          description: >
+            Tipo de materia:
+             * null - Retorna todas
+             * 1	Acusación Constitucional
+             * 2	Acción constitucional de particulares
+             * 3	Contienda de competencia
+             * 4	Rehabilitación de ciudadanía
+             * 5	Consentimientos actos del Presidente de la República
+             * 6	Acuerdo por ausencia de país de Presidente de la República
+             * 7	Declaración de inhabilidad Presidente de la República
+             * 8	Solicitud de dictamen del Presidente de la República
+             * 9	Modificaciones de Reglamentos internos
+             * 10	Consulta a Comisión
+             * 11	Declaración de Estado de sitio
+             * 12	Proyectos de acuerdo de la Sala del Senado
+             * 13	Nombramientos que corresponden al Senado
+             * 14	Otros
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /asuntos_tramitacion:
+    get:
+      tags:
+        - asuntos
+      summary: Entrega tramitacion de asunto S
+      operationId: getTramitacionAsunto
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - in: query
+          name: id_asunto
+          description: id del asunto
+          example: 2693
+          schema:
+            type: integer
+          required: true
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /asuntos/buscarAsuntosS:
+    get:
+      tags:
+        - asuntos
+      summary: Búsqueda avanzada de asuntos S con exportación
+      operationId: buscarAsuntosS
+      description: |
+        Permite realizar búsqueda avanzada de asuntos exclusivos del Senado (asuntos S), incluyendo búsqueda semántica. 
+        Si se proporciona boletin sin textoBusqueda, realiza búsqueda directa. 
+        Si se proporciona textoBusqueda, utiliza búsqueda semántica cuando sea necesario.
+        Si se proporciona el parámetro export, retorna archivo en el formato especificado.
+      parameters:
+        - in: query
+          name: boletin
+          description: número de boletín del asunto
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: textoBusqueda
+          description: texto para búsqueda semántica
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: anioInicio
+          description: año de inicio para filtrar (formato YYYY). Usar "0" para no filtrar
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: anioFin
+          description: año de fin para filtrar (formato YYYY). Usar "0" para no filtrar
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: materia
+          description: >
+            IDs de tipos de materia separados por coma (ejemplo 1,2,3). 
+            Tipos disponibles: 1-Acusación Constitucional, 2-Acción constitucional de particulares, 
+            3-Contienda de competencia, 4-Rehabilitación de ciudadanía, 
+            5-Consentimientos actos del Presidente de la República, 
+            6-Acuerdo por ausencia de país de Presidente de la República, 
+            7-Declaración de inhabilidad Presidente de la República, 
+            8-Solicitud de dictamen del Presidente de la República, 
+            9-Modificaciones de Reglamentos internos, 10-Consulta a Comisión, 
+            11-Declaración de Estado de sitio, 12-Proyectos de acuerdo de la Sala del Senado, 
+            13-Nombramientos que corresponden al Senado, 14-Otros
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: autores
+          description: IDs de autores separados por coma (ejemplo 123,456,789)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: export
+          description: >
+            Especifica el formato de exportación. Cuando se usa este parámetro:
+            - La respuesta será un archivo en el formato especificado
+            - Los parámetros de paginación (offset, limit) son ignorados
+            - Se exportan todos los resultados que coincidan con los filtros
+          schema:
+            type: string
+            enum: [excel, pdf, csv]
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: |
+            resultado de búsqueda que coincide con criterio.
+            Si se especifica export=excel, retorna archivo Excel.
+            Si se especifica export=pdf, retorna documento PDF.
+            Si se especifica export=csv, retorna archivo CSV.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                    description: Total de resultados encontrados
+                  rows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        asunid:
+                          type: number
+                          description: ID del asunto
+                        nroboletin:
+                          type: string
+                          description: Número de boletín
+                        titulo:
+                          type: string
+                          description: Título del asunto
+                        clasifid:
+                          type: number
+                          description: ID de clasificación
+                        fechaingreso:
+                          type: string
+                          description: Fecha de ingreso
+                        fecharegistro:
+                          type: string
+                          description: Fecha de registro
+                        estado:
+                          type: string
+                          description: Estado del asunto
+                        refundido:
+                          type: string
+                          description: Información de refundido
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: parámetro mal ingresado
+  /asuntos/totalAsuntosS:
+    get:
+      tags:
+        - asuntos
+      summary: Obtener total de asuntos S
+      operationId: getTotalAsuntosS
+      description: |
+        Retorna el total de asuntos exclusivos del Senado (asuntos S)
+      responses:
+        "200":
+          description: Total de asuntos S
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TOTALDEASUNTOSS:
+                      type: number
+                      example: 1234
+                      description: Total de asuntos S
+        "400":
+          description: parámetro mal ingresado
+  /asuntos/tipoAsuntos:
+    get:
+      tags:
+        - asuntos
+      summary: Obtener tipos de asuntos S
+      operationId: getTipoAsuntos
+      description: |
+        Retorna el listado de tipos/clasificaciones de asuntos exclusivos del Senado (asuntos S). Útil para obtener las opciones disponibles del parámetro id_materia.
+      responses:
+        "200":
+          description: Listado de tipos de asuntos S
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    CLASIFID:
+                      type: number
+                      example: 1
+                      description: Identificador del tipo de materia
+                    DESCRIPCION:
+                      type: string
+                      example: "Acusación Constitucional"
+                      description: Descripción del tipo de materia
+        "400":
+          description: parámetro mal ingresado
+  /asuntos/estadosDeTramitacion:
+    get:
+      tags:
+        - asuntos
+      summary: Obtener estados de tramitación de asuntos
+      operationId: getEstadosDeTramitacionAsuntos
+      description: |
+        Retorna los diferentes estados de tramitación disponibles para asuntos exclusivos del Senado (asuntos S)
+      responses:
+        "200":
+          description: Listado de estados de tramitación
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    IDESTADO:
+                      type: number
+                      example: 1
+                      description: Identificador del estado de tramitación
+                    DESCESTADO:
+                      type: string
+                      example: "En tramitación"
+                      description: Descripción del estado de tramitación
+        "400":
+          description: parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /asuntos/totalAsuntosIngresadosAnoActual:
+    get:
+      tags:
+        - asuntos
+      summary: Obtener total de asuntos ingresados en el año actual
+      operationId: getTotalAsuntosIngresadosAnoActual
+      description: |
+        Retorna el total de asuntos exclusivos del Senado (asuntos S) ingresados en el año actual
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Total de asuntos ingresados en el año actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TOTALASUNTOSINGRESADOSANOACTUAL:
+                      type: integer
+                      example: 95
+                      description: Total de asuntos ingresados en el año actual
+        "400":
+          description: parámetro mal ingresado
+  /asuntos/totalAsuntosDespachadosAnoActual:
+    get:
+      tags:
+        - asuntos
+      summary: Obtener total de asuntos despachados en el año actual
+      operationId: getTotalAsuntosDespachadosAnoActual
+      description: |
+        Retorna el total de asuntos exclusivos del Senado (asuntos S) despachados en el año actual
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Total de asuntos despachados en el año actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TOTALASUNTOSDESPACHADOS:
+                      type: integer
+                      example: 72
+                      description: Total de asuntos despachados en el año actual
+        "400":
+          description: parámetro mal ingresado
+  
+  
+  /asuntos/ultimoAsuntoIngresado:
+    get:
+      tags:
+        - asuntos
+      summary: Obtener último asunto ingresado
+      operationId: getUltimoAsuntoIngresado
+      description: |
+        Retorna el último asunto exclusivo del Senado (asunto S) ingresado en el sistema
+      responses:
+        "200":
+          description: Último asunto ingresado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ID_ASUNTO:
+                      type: integer
+                      example: 2693
+                      description: Identificador del asunto
+                    BOLETIN:
+                      type: string
+                      example: "S1234-01"
+                      description: Número de boletín del asunto
+                    TITULO:
+                      type: string
+                      example: "Título del asunto"
+                      description: Título del asunto
+                    MATERIA:
+                      type: string
+                      example: "Acusación Constitucional"
+                      description: Tipo de materia del asunto
+                    ID_MATERIA:
+                      type: integer
+                      example: 1
+                      description: Identificador del tipo de materia
+                    FECHA_INGRESO:
+                      type: string
+                      example: "15/03/2025"
+                      description: Fecha de ingreso del asunto (formato dd/mm/yyyy)
+                    SOLICITANTES:
+                      type: string
+                      example: "Senador Juan Pérez"
+                      description: Lista de solicitantes del asunto
+                    ID_ESTADO:
+                      type: integer
+                      example: 1
+                      description: Identificador del estado de tramitación
+                    ESTADO:
+                      type: string
+                      example: "En tramitación"
+                      description: Descripción del estado de tramitación
+                    REFUNDIDO:
+                      type: string
+                      example: "No"
+                      description: Información sobre si el asunto está refundido
+        "400":
+          description: parámetro mal ingresado
+        "500":
+          description: Error interno del servidor
+  /asuntos/ultimoAsuntoDespachado:
+    get:
+      tags:
+        - asuntos
+      summary: Obtener último asunto despachado
+      operationId: getUltimoAsuntoDespachado
+      description: |
+        Retorna el último asunto exclusivo del Senado (asunto S) despachado en el sistema
+      responses:
+        "200":
+          description: Último asunto despachado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Objeto asunto con sus campos
+        "400":
+          description: parámetro mal ingresado
+        "500":
+          description: Error interno del servidor
+  /oficio_de_incidentes/filtroSegunRespuesta:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener tipos de respuesta de oficios y antecedentes
+      operationId: getTipoRespuestaOficioAntecedentes
+      description: |
+        Retorna el listado de tipos de respuesta disponibles para oficios y antecedentes
+      responses:
+        "200":
+          description: Listado de tipos de respuesta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    valor:
+                      type: number
+                      example: 0
+                      description: Valor numérico del tipo de respuesta
+                    label:
+                      type: string
+                      example: "Todos"
+                      description: Etiqueta descriptiva del tipo de respuesta
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /oficio_de_incidentes/buscarOficiosDeIncidentes:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Búsqueda de oficios de incidentes con exportación
+      operationId: buscarOficiosDeIncidentes
+      description: |
+        Permite realizar búsqueda de oficios de incidentes con múltiples criterios de filtrado
+        Si se proporciona el parámetro export, retorna archivo en el formato especificado.
+      parameters:
+        - $ref: '#/components/parameters/idParam'
+        - $ref: '#/components/parameters/numeroOficioParam'
+        - $ref: '#/components/parameters/textoDeBusquedaParam'
+        - $ref: '#/components/parameters/tipoRespuestaOficioDeIncidentesParam'
+        - $ref: '#/components/parameters/listaParlamentariosParam'
+        - $ref: '#/components/parameters/destinatariosParam'
+        - $ref: '#/components/parameters/anioInicioParam'
+        - $ref: '#/components/parameters/anioFinParam'
+        # SE AGREGA NUEVO PARAMETRO EXPORT
+        - in: query
+          name: export
+          description: >
+            Especifica el formato de exportación. Cuando se usa este parámetro:
+            - La respuesta será un archivo en el formato especificado
+            - Los parámetros de paginación (offset, limit) son ignorados
+            - Se exportan todos los resultados que coincidan con los filtros
+          schema:
+            type: string
+            enum: [excel, pdf, csv]
+          required: false
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+        - in: query
+          name: conRespuesta
+          description: Si es true, retorna un arreglo las respuestas del oficio.
+          schema:
+            enum: [true, false]
+            type: boolean
+            default: true
+          required: true
+      responses:
+        "200":
+          description: |
+            resultado de búsqueda que coincide con criterio
+            Si se especifica export=excel, retorna archivo Excel.
+            Si se especifica export=pdf, retorna documento PDF. 
+            Si se especifica export=csv, retorna archivo CSV.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                    description: Total de resultados encontrados
+                    example: 25
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id_oficio:
+                          type: number
+                          description: ID del oficio
+                          example: 12345
+                        sesion:
+                          type: number
+                          description: ID de la sesión
+                          example: 9577
+                        nro_oficio:
+                          type: string
+                          description: Número del oficio
+                          example: "12345"
+                        fecha:
+                          type: string
+                          description: Fecha del oficio (formato dd/mm/yyyy)
+                          example: "15/03/2025"
+                        materia:
+                          type: string
+                          description: Materia del oficio
+                          example: "Solicitud de información"
+                        solicitantes:
+                          type: string
+                          description: Lista de solicitantes
+                          example: "Senador Juan Pérez"
+                        destinos:
+                          type: string
+                          description: Destinos del oficio
+                          example: "Ministerio del Interior"
+                        num_respuestas:
+                          type: number
+                          description: Número de respuestas recibidas
+                          example: 2
+                        link_documento_oficio:
+                          type: string
+                          description: URL del documento del oficio
+                          example: "https://api.documentos.senado.cl/12345?includeContent=true"
+                        respuestas:
+                          type: array
+                          description: Array de respuestas (solo si num_respuestas > 0)
+                          items:
+                            type: object
+                            properties:
+                              id_respuesta:
+                                type: number
+                                example: 67890
+                              fecha:
+                                type: string
+                                example: "20/03/2025"
+                              reservado:
+                                type: string
+                                example: "N"
+                              descripcion:
+                                type: string
+                                example: "Respuesta recibida"
+                              link_documento_respuesta:
+                                type: string
+                                example: "https://api.documentos.senado.cl/67890?includeContent=true"
+            # NUEVOS FORMATOS DE RESPUESTA (SIN DESCRIPTION)
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /oficio_de_incidentes/totalDeOficiosDeIncidentes:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener total de oficios de incidentes
+      operationId: getTotalDeOficiosDeIncidentes
+      description: |
+        Retorna el total de oficios de incidentes en el sistema
+      responses:
+        "200":
+          description: Total de oficios de incidentes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TOTALDEOFICIOSDEINCIDENTES:
+                      type: number
+                      example: 1234
+                      description: Total de oficios de incidentes
+        "400":
+          description: parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /oficio_de_incidentes/Destinatarios:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener listado de destinatarios
+      operationId: getDestinatarios
+      description: |
+        Retorna el listado de destinatarios disponibles para oficios de incidentes
+      parameters:
+        - in: query
+          name: sort
+          description: Campo por el cual ordenar (iddestino, descripcion)
+          schema:
+            type: string
+            enum: [iddestino, descripcion]
+          required: false
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Listado de destinatarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    IDDESTINO:
+                      type: number
+                      example: 1
+                      description: Identificador del destinatario
+                    DESCRIPCION:
+                      type: string
+                      example: "Ministerio del Interior"
+                      description: Descripción del destinatario
+        "400":
+          description: parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /oficio_de_incidentes/{idOficioDeIncidentes}/respuestas:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener respuestas de un oficio de incidentes
+      operationId: getRespuestasPorIdOficioDeIncidentes
+      description: |
+        Retorna el listado de respuestas asociadas a un oficio de incidentes específico identificado por su ID
+      parameters:
+        - in: path
+          name: idOficioDeIncidentes
+          description: ID del oficio de incidentes
+          required: true
+          schema:
+            type: integer
+            example: 19240
+      responses:
+        "200":
+          description: Listado de respuestas del oficio
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    IDRESPUESTA:
+                      type: number
+                      example: 67890
+                      description: Identificador de la respuesta
+                    IDOFICIO:
+                      type: number
+                      example: 12345
+                      description: ID del oficio al que pertenece la respuesta
+                    FECHA:
+                      type: string
+                      example: "20/03/2025"
+                      description: Fecha de la respuesta (formato dd/mm/yyyy)
+                    RESERVADO:
+                      type: string
+                      example: "N"
+                      description: Indica si la respuesta está reservada
+                    DESCRIPCION:
+                      type: string
+                      example: "Respuesta recibida"
+                      description: Descripción de la respuesta
+                    IDDESTINATARIO:
+                      type: number
+                      example: 1
+                      description: ID del destinatario
+                    link_documento_respuesta:
+                      type: string
+                      example: "https://api.documentos.senado.cl/67890?includeContent=true"
+                      description: URL del documento de la respuesta (si existe)
+        "400":
+          description: parámetro mal ingresado o ID inválido
+        "404":
+          description: Ofício de incidentes no encontrado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /oficio_de_incidentes/totalDeOficiosDeIncidentesAnoActual:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener total de oficios de incidentes ingresados en el año actual
+      operationId: getTotalDeOficiosDeIncidentesAnoActual
+      description: |
+        Retorna el total de oficios de incidentes ingresados en el año actual
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Total de oficios de incidentes ingresados en el año actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TOTALDEOFICIOSDEINCIDENTES:
+                      type: integer
+                      example: 156
+                      description: Total de oficios de incidentes ingresados en el año actual
+        "400":
+          description: parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /oficio_de_incidentes/totalRespuestasAnoActual:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener total de respuestas recibidas en el año actual
+      operationId: getTotalRespuestasAnoActual
+      description: |
+        Retorna el total de respuestas recibidas de oficios de incidentes en el año actual
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Total de respuestas recibidas en el año actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TOTALRESPUESTASRECIBIDAS:
+                      type: integer
+                      example: 234
+                      description: Total de respuestas recibidas en el año actual
+        "400":
+          description: parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /oficio_de_incidentes/ultimoOficioDeIncidentesIngresado:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener último oficio de incidentes ingresado
+      operationId: getUltimoOficioDeIncidentesIngresado
+      description: |
+        Retorna el último oficio de incidentes ingresado en el sistema
+      responses:
+        "200":
+          description: Último oficio de incidentes ingresado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ID_OFICIO:
+                    type: number
+                    example: 12345
+                    description: ID del oficio de incidentes
+                  SESION:
+                    type: number
+                    example: 9577
+                    description: ID de la sesión
+                  NRO_OFICIO:
+                    type: string
+                    example: "12345"
+                    description: Número del oficio de incidentes
+                  FECHA:
+                    type: string
+                    example: "15/03/2025"
+                    description: Fecha del oficio de incidentes (formato dd/mm/yyyy)
+                  MATERIA:
+                    type: string
+                    example: "Solicitud de información"
+                    description: Materia del oficio de incidentes
+                  SOLICITANTES:
+                    type: string
+                    example: "Senador Juan Pérez"
+                    description: Lista de solicitantes
+                  DESTINOS:
+                    type: string
+                    example: "Ministerio del Interior"
+                    description: Destinos del oficio de incidentes
+                  NUM_RESPUESTAS:
+                    type: number
+                    example: 2
+                    description: Número de respuestas recibidas
+                  LINK_DOCUMENTO_OFICIO:
+                    type: string
+                    example: "https://api.documentos.senado.cl/12345?includeContent=true"
+                    description: URL del documento del oficio de incidentes (si existe)
+  /oficio_de_incidentes/ultimarRespuestaDeIncidentesIngresada:
+    get:
+      tags:
+        - oficios-y-antecedentes
+      summary: Obtener última respuesta de incidentes ingresada
+      operationId: getUltimaRespuestaDeIncidentesIngresada
+      description: |
+        Retorna la última respuesta de incidentes ingresada en el sistema
+      responses:
+        "200":
+          description: Última respuesta de incidentes ingresada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  FECHA:
+                    type: string
+                    example: "20/03/2025"
+                    description: Fecha de la respuesta (formato dd/mm/yyyy)
+  /sintesis_legislativa:
+    get:
+      tags:
+        - estadisticas
+      summary: sintesis_legislativa
+      operationId: sintesis_legislativa
+      description: sintesis_legislativa
+      parameters:
+        - $ref: '#/components/parameters/idLegislaturaParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /sesiones_celebradas:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: sesiones_celebradas
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/tipo_sesion'
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /promedio_asistencia:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: promedio_asistencia
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - $ref: '#/components/parameters/tipo_sesion'
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /proyectos_despachados:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: proyectos_despachados
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /proyectos_despachados_por_etapa:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: proyectos_despachados_por_etapa
+      description: Entrega proyectos despachados agrupados por la etapa de tramitación
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - in: query
+          name: id_tramite
+          description: solo funciona con vista detalle.
+          schema:
+            type: number
+            default: 0
+          required: false
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /proyectos_s_internacionales_despachados:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: proyectos_s_internacionales_despachados
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'      
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /asuntos_s_despachados:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: asuntos_s_despachados
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /asuntos_s_despachados_por_materia:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: asuntos_s_despachados_por_materia
+      description: Entrega proyectos despachados agrupados por la etapa de tramitación
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - in: query
+          name: id_materia
+          description: solo funciona con vista detalle.
+          schema:
+            type: number
+            default: 0
+          required: false
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /homenajes:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: homenajes
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /incidentes:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: incidentes
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /lista_det_Sesiones_celebradas:
+    get:
+      tags:
+        - estadisticas
+      summary: Estadisticas
+      operationId: lista_det_Sesiones_celebradas
+      description: Entrega tramitacion de Asunto de tramitación exclusiva del Senado
+      parameters:
+        - $ref: '#/components/parameters/tipo_sesion'
+        - in: query
+          name: desde
+          description: fecha desde (formato 28/07/2022)
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: hasta
+          description: fecha hasta  (formato 28/07/2022)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/anoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /trabajo_de_comisiones:
+    get:
+      tags:
+        - estadisticas
+      summary: |
+            Si el id_comision es 0 el resultado original será para la legislatura. En caso de que id_comision identifique a una comisón se puede seleccionar el tipo de información para el listado de su detalle.
+      operationId: trabajo_de_comisiones
+      description:  sss
+      parameters:
+        - $ref: '#/components/parameters/tipo_comision'
+        - in: query
+          name: id_comision
+          description: identificador numerico de la comisión
+          schema:
+            type: number
+            default: 0
+          required: true
+        - $ref: '#/components/parameters/actividad_sesion_comision'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /sintesis_legislativa_mociones:
+    get:
+      tags:
+        - estadisticas
+      summary: sintesis_legislativa_mociones
+      operationId: sintesis_legislativa_mociones
+      description: sintesis_legislativa_mociones
+      parameters:
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /mociones_admisibles:
+    get:
+      tags:
+        - estadisticas
+      summary: Entrega total de mociones admisibles
+      operationId: total_mociones_admisibles
+      description: Entrega total de mociones admisibles
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /mociones_inadmisibles_detalle:
+    get:
+      tags:
+        - estadisticas
+      summary: Entrega total mociones inadmisibles
+      operationId:  total_mociones_inadmisibles
+      description: Entrega total mociones inadmisibles
+      parameters:
+        - $ref: '#/components/parameters/total_o_detalle'
+        - $ref: '#/components/parameters/idParlamentarioParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'        
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /urgencias:
+    get:
+      tags:
+        - ventanilla-unica
+      summary: Entrega urgencias
+      operationId: urgencias
+      description: Entrega urgencias
+      parameters:
+        - $ref: '#/components/parameters/resideCamaraParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+  /noticias_proyectos:
+    get:
+      tags:
+        - ventanilla-unica
+      summary: Obtener artículos de noticias relacionados con un boletín
+      operationId: noticias_proyectos
+      description: |
+        Obtiene todos los artículos de noticias relacionados con un boletín específico.
+        Consulta la API de Drupal para buscar noticias que tengan asociado el boletín indicado
+        y retorna los alias (URLs completas) y títulos de todas las noticias encontradas.
+      parameters:
+        - in: query
+          name: boletin
+          description: Número de boletín del proyecto (formato 12345-67)
+          schema:
+            type: string
+            example: "16499-03"
+          required: true
+      responses:
+        "200":
+          description: Lista de artículos de noticias encontradas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  boletin:
+                    type: string
+                    description: Número de boletín consultado
+                    example: "10634-25"
+                  total:
+                    type: number
+                    description: Cantidad total de artículos encontrados
+                    example: 1
+                  articulos:
+                    type: array
+                    description: Lista de artículos con alias y título
+                    items:
+                      type: object
+                      properties:
+                        alias:
+                          type: string
+                          description: URL completa del artículo
+                          example: "https://www.senado.cl/comunicaciones/noticias/combate-al-comercio-ilegal-y-crimen-organizado-respaldan-norma-que-obligara"
+                        title:
+                          type: string
+                          description: Título del artículo
+                          example: "Combate al comercio ilegal y crimen organizado: respaldan norma que obligará a formalizar importaciones"
+                        created:
+                          type: string
+                          description: Fecha de creación del artículo (formato dd/mm/yyyy)
+                          example: "05/12/2023"
+                        bajada:
+                          type: string
+                          description: Descripción corta o bajada del artículo
+                          example: "En el marco de la agenda de seguridad la Sala despachó este mensaje que apunta a facilitar las labores de fiscalización y persecución de los delitos e infracciones por parte del Servicio de Impuestos Internos y Aduanas."
+                    example:
+                      - alias: "https://www.senado.cl/comunicaciones/noticias/combate-al-comercio-ilegal-y-crimen-organizado-respaldan-norma-que-obligara"
+                        title: "Combate al comercio ilegal y crimen organizado: respaldan norma que obligará a formalizar importaciones"
+                        created: "05/12/2023"
+                        bajada: "En el marco de la agenda de seguridad la Sala despachó este mensaje que apunta a facilitar las labores de fiscalización y persecución de los delitos e infracciones por parte del Servicio de Impuestos Internos y Aduanas."
+        "400":
+          description: parámetro mal ingresado o faltante
+        "500":
+          description: Error al consultar la API de noticias
+  /proyectos/ingresadosUltimoAno:
+    get:
+      tags:
+        - proyectos
+      summary: Lista de proyectos ingresados en el último año
+      operationId: getProyectosIngresadosUltimoAno
+      description: |
+        Retorna los proyectos ingresados en el año indicado (parámetro opcional 'ano'). Si no se indica, se usa el año actual.
+      parameters:
+        - in: query
+          name: ano
+          description: Año de consulta (opcional, por defecto el año actual)
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listado de proyectos ingresados en el año
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    proyfechaingreso:
+                      type: string
+                      description: Fecha de ingreso del proyecto
+                      example: "2025-03-15"
+                    proyid:
+                      type: integer
+                      description: ID del proyecto
+                      example: 12345
+                    proynumeroboletin:
+                      type: string
+                      description: Número de boletín
+                      example: "14567-07"
+                    proysuma:
+                      type: string
+                      description: Título o resumen del proyecto
+                      example: "Modifica la ley de tránsito"
+                    proyiniciativa:
+                      type: string
+                      description: Iniciativa del proyecto
+                      example: "Mensaje"
+                    proyorigen:
+                      type: string
+                      description: Origen del proyecto
+                      example: "Ejecutivo"
+        "400":
+          description: Parámetro mal ingresado
+  /proyectos/despachadosUltimoAno:
+    get:
+      tags:
+        - proyectos
+      summary: Lista de proyectos despachados en el último año
+      operationId: getProyectosDespachadosUltimoAno
+      description: Lista de proyectos despachados en el último año
+      parameters:
+        - in: query
+          name: ano
+          description: Año de consulta (opcional, por defecto el año actual)
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          description: Offset para la paginación
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          description: Limit para la paginación
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: sort
+          description: Sort para la paginación
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: order
+          description: Order para la paginación
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Listado de proyectos despachados en el último año
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    proyfechaingreso:
+                      type: string
+                      description: Fecha de ingreso del proyecto
+                      example: "2025-03-15"
+                    proyid:
+                      type: integer
+                      description: ID del proyecto
+                      example: 12345
+                    proynumeroboletin:
+                      type: string
+                      description: Número de boletín
+                      example: "14567-07"
+                    proysuma:
+                      type: string
+                      description: Título o resumen del proyecto
+                      example: "Modifica la ley de tránsito"
+                    proyiniciativa:
+                      type: string
+                      description: Iniciativa del proyecto
+                      example: "Mensaje"
+                    proyorigen:
+                      type: string
+                      description: Origen del proyecto
+                      example: "Ejecutivo"
+        "400":
+          description: Parámetro mal ingresado  
+  /proyectos/proyectosConvertidosEnLey:
+    get:
+      tags:
+        - proyectos
+      summary: Lista de proyectos convertidos en ley
+      operationId: getProyectosConvertidosEnLey
+      description: Lista de proyectos convertidos en ley
+      parameters:
+        - in: query
+          name: ano
+          description: Año de consulta (opcional, por defecto el año actual)
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listado de proyectos convertidos en ley
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    leypubfecha:
+                      type: string
+                      description: Fecha de publicación de la ley
+                      example: "2025-03-15"
+                    proyid:
+                      type: integer
+                      description: ID del proyecto
+                      example: 12345
+                    proynumeroboletin:
+                      type: string
+                      description: Número de boletín
+                      example: "14567-07"
+                    proysuma:
+                      type: string
+                      description: Título o resumen del proyecto
+                      example: "Modifica la ley de tránsito"
+                    proyiniciativa:
+                      type: string
+                      description: Iniciativa del proyecto
+                      example: "Mensaje"
+                    proyorigen:
+                      type: string
+                      description: Origen del proyecto
+                      example: "Ejecutivo"
+        "400":
+          description: Parámetro mal ingresado
+  /proyectos/tramitacionProyecto/{proyid}:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener la tramitación de un proyecto por ID
+      operationId: tramitacionProyecto
+      description: Retorna el historial de tramitación de un proyecto específico identificado por su ID.
+      parameters:
+        - in: path
+          name: proyid
+          description: ID del proyecto
+          required: true
+          schema:
+            type: integer
+            example: 12611
+      responses:
+        "200":
+          description: Tramitación del proyecto encontrada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tramite_id:
+                      type: integer
+                      description: ID del trámite
+                      example: 1
+                    tramite_nombre:
+                      type: string
+                      description: Nombre del trámite
+                      example: "Primera lectura"
+                    fecha:
+                      type: string
+                      description: Fecha del trámite
+                      example: "2025-03-15"
+                    observaciones:
+                      type: string
+                      description: Observaciones del trámite
+                      example: "Aprobado en general"
+        "400":
+          description: Parámetro mal ingresado
+        "404":
+          description: Proyecto no encontrado
+  /proyectos/ultimosProyectosIngresados:
+    get:
+      tags:
+        - proyectos
+      summary: Lista de últimos proyectos ingresados
+      operationId: getUltimosProyectosIngresados
+      description: |
+        Retorna los últimos proyectos ingresados
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Listado de últimos proyectos ingresados
+        "400":
+          description: Parámetro mal ingresado
+  /proyectos/estadosDeTramitacion:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener estados de tramitación
+      operationId: getEstadosDeTramitacion
+      description: |
+        Retorna los diferentes estados de tramitación de proyectos
+      responses:
+        "200":
+          description: Listado de estados de tramitación
+        "400":
+          description: Parámetro mal ingresado
+  /proyectos/autoresProyecto:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener autores de proyectos
+      operationId: getAutoresProyecto
+      description: |
+        Retorna información de autores de proyectos
+      parameters:
+        - in: query
+          name: id_proyecto
+          description: ID del proyecto
+          schema:
+            type: integer
+          required: false
+        - in: query
+          name: boletin
+          description: número de boletín del proyecto
+          schema:
+            type: string
+          required: false
+      responses:
+        "200":
+          description: Listado de autores
+        "400":
+          description: Parámetro mal ingresado
+  /proyectos/buscarProyectosDeLey:
+    get:
+      tags:
+        - proyectos
+      summary: Búsqueda avanzada de proyectos de ley
+      operationId: buscarProyectosDeLey
+      description: |
+        Permite realizar búsqueda avanzada de proyectos de ley, incluyendo búsqueda semántica.
+
+        Si se proporciona el parámetro export, retorna archivo en el formato especificado.
+      parameters:
+        - $ref: '#/components/parameters/textoDeBusquedaParam'
+        - in: query
+          name: boletin
+          example: '17870-05'
+          description: numero de boletin del proyecto
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/estadoTramitacionParam'
+        - $ref: '#/components/parameters/camaraParam'
+        - $ref: '#/components/parameters/iniciativaParam'
+        - $ref: '#/components/parameters/fechaDesdeParam'
+        - $ref: '#/components/parameters/fechaHastaParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+
+        # ÚNICA ADICIÓN SOLICITADA
+        - in: query
+          name: export
+          description: Formato de exportación (excel, pdf o csv)
+          schema:
+            type: string
+            enum: [excel, pdf, csv]
+          required: false
+
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: parámetro mal ingresado
+
+
+  /proyectos/totalProyectosDeLey:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener total de proyectos de ley
+      operationId: getTotalProyectosDeLey
+      description: |
+        Retorna el total de proyectos de ley según los filtros aplicados
+      responses:
+        "200":
+          description: Total de proyectos de ley
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  TOTALDEPROYECTOSDELEY:
+                    type: integer
+                    example: 17543
+                    description: Total de proyectos de ley
+        "400":
+          description: parámetro mal ingresado
+  /proyectos/anioProyectoMasAntiguo:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener año del proyecto más antiguo
+      operationId: getAnioProyectoMasAntiguo
+      description: |
+        Retorna el año del proyecto más antiguo en el sistema
+      responses:
+        "200":
+          description: Año del proyecto más antiguo
+        "400":
+          description: Parámetro mal ingresado
+  /proyectos/totalProyectosIngresadosAnoActual:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener total de proyectos ingresados en el año actual
+      operationId: getTotalProyectosIngresadosAnoActual
+      description:
+        Retorna el total de proyectos de ley ingresados en el año actual
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Total de proyectos ingresados en el año actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TOTALDEPROYECTOSINGRESADOSANOACTUAL:
+                      type: integer
+                      example: 125
+                      description: Total de proyectos ingresados en el año actual
+        "400":
+          description: parámetro mal ingresado
+  /proyectos/totalProyectosDespachadosAnoActual:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener total de proyectos despachados en el año actual
+      operationId: getTotalProyectosDespachadosAnoActual
+      description: 
+        Retorna el total de proyectos de ley despachados en el año actual
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Total de proyectos despachados en el año actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    PROYECTOSDESPACHADOS:
+                      type: integer
+                      example: 85
+                      description: Total de proyectos despachados en el año actual
+        "400":
+          description: parámetro mal ingresado
+  /proyectos/totalProyectosConvertidosEnLeyAnoActual:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener total de proyectos convertidos en ley en el año actual
+      operationId: getTotalProyectosConvertidosEnLeyAnoActual
+      description: |
+        Retorna el total de proyectos de ley convertidos en ley en el año actual
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Total de proyectos convertidos en ley en el año actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    PROYECTOSCONVERTIDOSENLEY:
+                      type: integer
+                      example: 42
+                      description: Total de proyectos convertidos en ley en el año actual
+        "400":
+          description: parámetro mal ingresado
+  /proyectos/ultimoProyectoIngresado:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener último proyecto ingresado
+      operationId: getUltimoProyectoIngresado
+      description: |
+        Retorna el último proyecto de ley ingresado en el sistema
+      responses:
+        "200":
+          description: Último proyecto ingresado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Objeto proyecto con todos sus campos de la base de datos
+        "400":
+          description: Parámetro mal ingresado
+        "500":
+          description: Error interno del servidor
+  /proyectos/ultimoProyectoDespachado:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener último proyecto despachado
+      operationId: getUltimoProyectoDespachado
+      description: |
+        Retorna el último proyecto de ley despachado en el sistema
+      responses:
+        "200":
+          description: Último proyecto despachado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Objeto proyecto con todos sus campos de la base de datos
+        "400":
+          description: Parámetro mal ingresado
+        "500":
+          description: Error interno del servidor
+  /proyectos/ultimoProyectoConvertidoEnLey:
+    get:
+      tags:
+        - proyectos
+      summary: Obtener último proyecto convertido en ley
+      operationId: getUltimoProyectoConvertidoEnLey
+      description: |
+        Retorna el último proyecto de ley convertido en ley en el sistema
+      responses:
+        "200":
+          description: Último proyecto convertido en ley
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Objeto proyecto con todos sus campos de la base de datos
+        "400":
+          description: Parámetro mal ingresado
+        "500":
+          description: Error interno del servidor
+  /congreso/camarasDelCongreso:
+    get:
+      tags:
+        - congreso
+      summary: Obtener cámaras del congreso
+      operationId: getCamarasDelCongreso
+      description: |
+        Retorna información sobre las cámaras del congreso
+      responses:
+        "200":
+          description: Listado de cámaras del congreso
+        "400":
+          description: Parámetro mal ingresado
+  /votaciones/buscarVotaciones:
+    get:
+      tags:
+        - votaciones
+      summary: Buscar votaciones
+      operationId: buscarVotaciones
+      description: |
+        Busca votaciones según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idVotacionParam'
+        - $ref: '#/components/parameters/idSesionParam'
+        - $ref: '#/components/parameters/boletinParam'
+
+        - $ref: '#/components/parameters/textoDeBusquedaParam'
+
+        - in: query
+          name: conDetalle
+          description: Si es true, retorna el detalle de la votación
+          schema:
+            enum: [true, false]
+            type: boolean
+            default: true
+          required: false
+        #- $ref: '#/components/parameters/palabraClaveParam'
+        - $ref: '#/components/parameters/idLegislaturaParam'
+
+        - $ref: '#/components/parameters/fechaInicioParam'
+        - $ref: '#/components/parameters/fechaFinParam'
+
+        - $ref: '#/components/parameters/anioInicioParam'
+        - $ref: '#/components/parameters/anioFinParam'
+
+        - $ref: '#/components/parameters/mesParam'
+        - $ref: '#/components/parameters/anoParam'
+
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /votaciones/publicarVotaciones:
+    post:
+      tags:
+        - votaciones
+      summary: Publicar votaciones
+      operationId: publicarVotaciones
+      description: |
+        Publica votaciones según los parámetros ingresados
+      parameters:
+        - in: query
+          name: id_votacion
+          description: identificador de la votacion
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: id_sesion
+          description: identificador de la sesion
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: hora_termino
+          description: hora de termino de la votacion formato dd/mm/yyyy hh24:mi:ss
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}$'
+        - in: query
+          name: tema
+          description: tema de la votacion
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: nro_boletin
+          description: numero de boletin de la votacion
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: total_si
+          description: total de si de la votacion
+          required: true  
+          schema:
+            type: integer
+        - in: query
+          name: total_no
+          description: total de no de la votacion
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: total_abstencion
+          description: total de abstencion de la votacion
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: votos
+          description: votos de la votacion
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              example:
+                - parlid: 1
+                  voto: 1
+                  pareadocon: null
+                - parlid: 2
+                  voto: 2
+                  pareadocon: null
+                - parlid: 3
+                  voto: 3
+                  pareadocon: null
+                - parlid: 4
+                  voto: 4
+                  pareadocon: 5
+              properties:
+                parlid:
+                  type: integer
+                  description: identificador del parlamentario
+                voto:
+                  type: integer
+                  description: voto del parlamentario  1:SI 2:NO 3:ABST
+                  enum: [1, 2, 3, 4]
+                pareadocon:
+                  type: integer
+                  description: identificador del parlamentario pareado con
+        - in: query
+          name: resultado
+          description: resultado de la votacion
+          required: true
+          schema:
+            type: string
+            enum: [APROBADA, RECHAZADA, EMPATADA ]
+        - in: query
+          name: quorum
+          description: quorum de la votacion
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: pareo_texto
+          description: pareo de la votacion
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: iditemtabla
+          description: identificador del item de la tabla
+          required: true
+          schema:
+            type: integer
+  /votaciones/eventoVotacion:
+    post:
+      tags:
+        - votaciones
+      summary: Registrar evento de votación
+      operationId: eventoVotacion
+      description: |
+        Registra un evento asociado a una votación ya existente.
+        Valida que:
+        - numero_evento esté entre 9 y 12
+        - fechaHora tenga formato dd-mm-yyyy hh24:mi:ss
+        - anotacion sea un string de 64 caracteres sin caracteres peligrosos
+        - id_sesion sea un número mayor a 0 y menor a 999999999
+      parameters:
+        - in: query
+          name: id_votacion
+          description: Identificador de la votación a la que pertenece el evento
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: id_sesion
+          description: Identificador de la sesión asociada al evento
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 999999998
+        - in: query
+          name: numero_evento
+          description: Número del evento, entre 8 y 12
+          required: true
+          schema:
+            type: integer
+            minimum: 8
+            maximum: 12
+        - in: query
+          name: fechaHora
+          description: Fecha y hora del evento en formato dd-mm-yyyy hh24:mi:ss
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: anotacion
+          description: Cadena de hasta 64 caracteres sin comillas ni caracteres especiales peligrosos
+          required: false
+          schema:
+            type: string
+            minLength: 0
+            maxLength: 64
+      responses:
+        "200":
+          description: Evento de votación registrado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  estado:
+                    type: string
+                    example: "OK"
+        "400":
+          description: Error de validación en los parámetros de entrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        default:
+          description: Error inesperado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /busqueda-semantica/buscar-semanticamente:
+    get:
+      tags:
+        - busqueda-semantica
+      summary: Buscar asuntos semanticamente
+      operationId: buscarSemanticamente
+      description: |
+        Busca asuntos semanticamente según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/textoDeBusquedaParam'
+        - in: query
+          name: proyectos
+          description: Si es true, retorna los proyectos
+          schema:
+            enum: [true, false]
+            type: boolean
+            default: true
+          required: true
+        - in: query
+          name: asuntos
+          description: Si es true, retorna los asuntos
+          schema:
+            enum: [true, false]
+            type: boolean
+            default: true
+          required: true
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        "200":
+          description: resultado de búsqueda que coincide con criterio
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/documentosDeSesion:
+    get:
+      tags:
+        - documentos
+      summary: Obtener documentos de sesión
+      operationId: getDocumentosDeSesion
+      description: |
+        Retorna los documentos de sesión según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idSesionParam'
+        - $ref: '#/components/parameters/idProyectoParam'
+        - $ref: '#/components/parameters/idAsuntoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Documentos de sesión
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/totalDocumentosDeSesion:
+    get:
+      tags:
+        - documentos
+      summary: Obtener documentos de sesión
+      operationId: getTotalDocumentosDeSesion
+      description: |
+        Retorna el total de los documentos de sesión según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idSesionParam'
+        - $ref: '#/components/parameters/idProyectoParam'
+        - $ref: '#/components/parameters/idAsuntoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Documentos de sesión
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/informesDeProyecto:
+    get:
+      tags:
+        - documentos
+      summary: Obtener informes de proyecto
+      operationId: getInformesDeProyecto
+      description: |
+        Retorna los informes de proyecto según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idProyectoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Informes de proyecto
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/oficiosDeProyecto:
+    get:
+      tags:
+        - documentos
+      summary: Obtener oficios de proyecto
+      operationId: getOficiosDeProyecto
+      description: |
+        Retorna los oficios de proyecto según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idProyectoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Oficios de proyecto
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/indicacionesDeProyecto:
+    get:
+      tags:
+        - documentos
+      summary: Obtener indicaciones de proyecto
+      operationId: getIndicacionesDeProyecto
+      description: |
+        Retorna las indicaciones de proyecto según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idProyectoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Indicaciones de proyecto
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/comparadosDeProyecto: 
+    get:
+      tags:
+        - documentos
+      summary: Obtener comparados de proyecto
+      operationId: getComparadosDeProyecto
+      description: |
+        Retorna los comparados de proyecto según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idProyectoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Comparados de proyecto
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/presentacionesSalaDeProyecto:
+    get:
+      tags:
+        - documentos
+      summary: Obtener presentaciones en sala de proyecto
+      operationId: getPresentacionesSalaDeProyecto
+      description: |
+        Retorna las presentaciones en sala de proyecto según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idProyectoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Presentaciones en sala de proyecto
+        "400":
+          description: Parámetro mal ingresado
+        "422":
+          description: Entidad no procesable
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/informesDeAsuntoS:
+    get:
+      tags:
+        - documentos
+      summary: Obtener informes de asunto S
+      operationId: getInformesDeAsuntoS
+      description: |
+        Retorna los informes de asunto S según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idAsuntoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Informes de asunto S
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/oficiosDeAsuntoS:
+    get:
+      tags:
+        - documentos
+      summary: Obtener oficios de asunto S
+      operationId: getOficiosDeAsuntoS
+      description: |
+        Retorna los oficios de asunto S según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idAsuntoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Oficios de asunto S
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/indicacionesDeAsuntoS:
+    get:
+      tags:
+        - documentos
+      summary: Obtener indicaciones de asunto S
+      operationId: getIndicacionesDeAsuntoS
+      description: |
+        Retorna las indicaciones de asunto S según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idAsuntoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Indicaciones de asunto S
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel' 
+  /documentos/comparadosDeAsuntoS:
+    get:
+      tags:
+        - documentos
+      summary: Obtener comparados de asunto S
+      operationId: getComparadosDeAsuntoS
+      description: |
+        Retorna los comparados de asunto S según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idAsuntoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Comparados de asunto S
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/presentacionesSalaDeAsuntoS:
+    get:
+      tags:
+        - documentos
+      summary: Obtener presentaciones en sala de asunto S
+      operationId: getPresentacionesSalaDeAsuntoS
+      description: |
+        Retorna las presentaciones en sala de asunto S según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idAsuntoParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Presentaciones en sala de asunto S
+        "400":
+          description: Parámetro mal ingresado
+        "422":
+          description: Entidad no procesable
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+  /documentos/documentosDeSesionIndependiente:
+    get:
+      tags:
+        - documentos
+      summary: Obtener documentos de sesión independiente
+      operationId: getDocumentosDeSesionIndependiente
+      description: |
+        Retorna los documentos de sesión independiente según los parámetros ingresados
+      parameters:
+        - $ref: '#/components/parameters/idSesionParam'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Documentos de sesión independiente
+        "400":
+          description: Parámetro mal ingresado
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorModel'
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+    ApiKeyAuth:        # arbitrary name for the security scheme
+      type: apiKey
+      in: header       # can be "header", "query" or "cookie"
+      name: Authorization  # name of the header, query parameter or cookie
+  schemas:
+    Parlamentario:
+      type: object
+      properties:
+        id_parlamentario:
+          type: number
+          example: 1111
+          description: Identificador del parlamentario
+        id:
+          type: number
+          example: 1111
+          description: Identificador del parlamentario (alias de id_parlamentario)
+        uuid:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        slug:
+          type: string
+          example: maria-carmen-del-rio-gonzalez
+          description: Slug del parlamentario para URLs amigables
+        nombre:
+          type: string
+          example: María Carmen De los ángeles
+        apellido_paterno:
+          type: string
+          example: Del río
+        apellido_materno:
+          type: string
+          example: Gonzalez
+        nombre_completo:
+          type: string
+          example: María Carmen De los ángeles Del río Gonzalez
+          description: Nombre completo concatenado (nombre + apellido paterno + apellido materno)
+        nombre_completo_por_nombre:
+          type: string
+          example: María Carmen De los ángeles Del río Gonzalez
+          description: Nombre completo ordenado por nombre
+        camara:
+          type: string
+          enum: [D, S]
+          example: S
+          description: >
+            Tipo de cámara:
+             * null - Retorna de ambas cámaras
+             * `D` - Retorna solo diputadas y diputados
+             * `S` - Retorna solo senadoras y senadores
+        partido_id:
+          type: number
+          example: 5
+          description: Identificador del partido político
+        partido:
+          type: string
+          example: Partido Socialista
+          description: Nombre del partido político
+        circunscripcion_id:
+          type: number
+          example: 15
+          description: Identificador de la circunscripción
+        region_id:
+          type: number
+          example: 5
+          description: Identificador de la región
+        region:
+          type: string
+          example: Valparaíso
+          description: Nombre de la región
+        email:
+          type: string
+          format: email
+          example: senadora@senado.cl
+        fono:
+          type: string
+          example: "+56 32 250 4000"
+          description: Teléfono del parlamentario
+        sexo:
+          type: number
+          enum: [1, 2]
+          example: 1
+          description: >
+            Sexo del parlamentario:
+             * `1` - Femenino
+             * `2` - Masculino
+        comite:
+          type: string
+          example: "{\"ID\":1,\"UUID\":\"uuid\",\"NOMBRE\":\"Comité\",\"ABREVIATURA\":\"COM\"}"
+          description: Información del comité en formato JSON string
+        cuantos:
+          type: number
+          example: 50
+          description: Total de registros que coinciden con los criterios de búsqueda
+        periodos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParlamentarioPeriodo"
+    Comite:
+      type: object
+      properties:
+        id:
+          type: number
+        uuid:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        nombre:
+          type: string
+          example: "Independientes"
+        abreviatura:
+          type: string
+          example: "INDEPENDIENTE"
+        vigencia:
+          type: number
+          enum: [0,1]
+    Region:
+      type: object
+      properties:
+        id:
+          type: number
+        uuid:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        nombre:
+          type: string
+          example: "Región de Valparaíso"
+        orden:
+          type: number
+          example: 6
+    Comision:
+      type: object
+      properties:
+        id:
+          type: number
+        uuid:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        titulo:
+          type: string
+          example: "Permanente"
+        descripcion:
+          type: string
+          example: "de Gobierno, Descentralización y Regionalización"
+        tipo_id:
+          type: number
+          description: identificador del tipo de comision
+          example: 10
+        numero:
+          type: number
+          description: este número lo tienen las comisiones permanentes y corresponde al orden jerarquico
+          example: 1
+    ResultadoComision:
+      type: object
+      properties:
+        tipo:
+          type: string
+          enum: [sesion, actividad]
+        id_comision:
+          type: number
+        comision:
+          type: string
+          example: "de Gobierno, Descentralización y Regionalización"
+        fecha:
+          type: string
+          example: "10/08/2023"
+        fracasada:
+          type: string
+          enum: [Si, No]
+        materia:
+          type: string
+    CitacionComision:
+      type: object
+      properties:
+        id_comision:
+          type: number
+        descripcion:
+          type: string
+          example: "de Gobierno, Descentralización y Regionalización"
+        citaciones:
+          type: array
+          items:
+            $ref: "#/components/schemas/Citacion"
+    Citacion:
+      type: object
+      properties:
+        fecha:
+          type: number
+        lugar:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        horario:
+          type: string
+          enum: [C, S]
+        materia:
+          type: string
+          example: "2023"
+        sin_efecto:
+          type: number
+          description: 1-Ha quedado sin efecto    0-
+          enum: [0,1]
+        tv:
+          type: number
+          description: 1- La sesión será transmitida por TV Senado y por el sitio http://tv.senado.cl   0-no sera transnmitida
+          enum: [0,1]
+    ParlamentarioPeriodo:
+      type: object
+      properties:
+        id:
+          type: number
+        uuid:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        camara:
+          type: string
+          enum: [C, S]
+        desde:
+          type: string
+          example: "2023"
+        hasta:
+          type: string
+          example: "2023"
+        vigencia:
+          type: number
+          enum: [0,1]
+    ErrorModel:
+      type: object
+      required:
+      - message
+      - code
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+          minimum: 100
+          maximum: 600
+  parameters:
+    idParam:
+      name: id
+      in: query
+      description: Identificador del registro en la base de datos
+
+      schema:
+        type: number
+      required: false
+    idVotacionParam:
+      name: id_votacion
+      in: query
+      description: Identificador de la votación
+      schema:
+        type: number
+      required: false
+    idSesionParam:
+      name: id_sesion
+      in: query
+      description: Identificador de la sesión
+      schema:
+        type: number
+        example: 8412
+      required: false
+    idProyectoParam:
+      name: id_proyecto
+      in: query
+      description: Identificador del proyecto
+      schema:
+        type: number
+      required: false
+    idAsuntoParam:
+      name: id_asunto
+      in: query
+      description: Identificador del asunto
+      schema:
+        type: number
+      required: false
+    boletinParam:
+      name: boletin
+      in: query
+      description: Boletín de la votación (formato 1234-56 or S1234-01)
+      schema:
+        type: string
+      required: false
+    offsetParam:
+      name: offset
+      in: query
+      description: Numero de items para saltar.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    limitParam:
+      name: limit
+      in: query
+      description: Cantidad máxima de registros a retornar.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 10
+    sortParam:
+      name: sort
+      in: query
+      description: Parámetro por el cuál se realiza la búsqueda. Se puede poner mas de uno separado por (,)
+      required: false
+      schema:
+        type: string
+        default: 
+    orderParam:
+      name: order
+      in: query
+      description: | 
+        Orden en el cuál es retornada la lista de respuestas, que puede ser ascendente [ASC] o descendente [DESC].
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+    idParlamentarioParam:
+      name: id_parlamentario
+      in: query
+      description: debe usarse id_parlamentario o uuid o slug cuando se quiere la informacion de un parlamentaio en particular. Si se omiten traera el listado de acuerdo a los otros parametros. Ebensperger 1212, Allende 985
+      schema:
+        type: number
+      required: false
+    uuidParam:
+      in: query
+      name: uuid
+      description: debe usarse id_parlamentario o uuid o slug cuando se quiere la informacion de un parlamentaio en particular. Si se omiten traera el listado de acuerdo a los otros parametros
+      schema:
+        type: string
+      required: false
+    slugParam:
+      in: query
+      name: slug
+      description: debe usarse id_parlamentario o uuid o slug cuando se quiere la informacion de un parlamentaio en particular. Si se omiten traera el listado de acuerdo a los otros parametros
+      schema:
+        type: string
+      required: false
+    idLegislaturaParam:
+      in: query
+      name: id_legislatura
+      description: debe usarse id_legislatura o año o año y mes, para restringir periodo de consulta. Legislatura actual 503
+      schema:
+        type: number
+      required: false
+    mesParam:
+      in: query
+      name: mes
+      description: debe usarse id_legislatura o año o año y mes, para restringir periodo de consulta
+      schema:
+        type: number
+      required: false
+    anoParam:
+     in: query
+     name: ano
+     description: debe usarse id_legislatura o año o año y mes, para restringir periodo de consulta
+     schema:
+       type: number
+     required: false
+    palabra_clave:
+      in: query
+      name: palabra_clave
+      description: palabra clave
+      schema:
+        type: string
+      required: false
+    destinatariosParam:
+      in: query
+      name: destinatarios
+      description: destinatarios, texto libre para búsqueda
+      schema:
+        type: string
+      required: false
+    area_de_interes:
+      in: query
+      name: area_de_interes
+      description: palabra clave
+      schema:
+        type: string
+        enum: [Trabajo de Sala, Trabajo de Comisiones]
+        default: Trabajo de Sala
+      required: true
+    tipo_sesion:
+        in: query
+        name: tipo_sesion
+        schema:
+          type: number
+          enum: 
+          - 0
+          - 14
+          - 15
+          - 16
+          - 19
+          - 20
+          default: 0
+        description: >
+          Tipos de sesión:
+            * `0` - Todas
+            * `14` - Ordinaria
+            * `15` - Extraordinaria
+            * `16` - Especial
+            * `19` - Congreso Pleno
+            * `20` - De instalación
+        required: true
+    materiaParam:
+      in: query
+      name: materia
+      description: materia, texto de busqueda
+      schema:
+        type: string
+      required: false
+    tipo_comision:
+      in: query
+      name: tipo_comision
+      description: tipo de sesion
+      schema:
+        type: string
+        enum: [Permanente, Mixta, Unidas, Especial, Presupuesto]
+        default: Permanente
+      required: true
+    actividad_sesion_comision:
+      in: query
+      name: actividad_sesion_comision
+      description: actividades realizadas en sesiones de comisión
+      schema:
+        type: string
+        enum: [Sesiones, Temas estudiados, Informes emitidos, Otras actividades]
+        default: Sesiones
+      required: true
+    total_o_detalle:
+      in: query
+      name: total_o_detalle
+      description: indica si se pregunta por el total número de tuplas o su listado en detalle
+      schema:
+        type: string
+        enum: [Total, Detalle]
+        default: Total
+      required: true
+    camara_origen:
+      in: query
+      name: camara_origen
+      description: camara de origen
+      schema:
+        type: string
+        enum: [S, D]
+        default: D
+        description: >
+          Camara de origen:
+            * `S` - Senado
+            * `D` - C. Diputados
+      required: true
+    estadoUrgencia:
+      in: query
+      name: estado_urgencia
+      description: estado de la urgencia
+      schema:
+        type: string
+        enum: [VIGENTE, EXPIRADO]
+        default: VIGENTE
+      required: false
+    camaraParam:
+      in: query
+      name: camara
+      required: false
+      schema:
+        type: string
+        nullable: true
+        enum: 
+        - D
+        - S
+        default: null
+      description: >
+        Tipo de cámara:
+         * null - Retorna de ambas cámaras
+         * `D` - Retorna solo diputadas y diputados
+         * `S` - Retorna solo senadoras y senadores
+    fechaDesdeParam:
+      in: query
+      name: fecha_desde
+      required: false
+      schema:
+        type: string
+        pattern: '^\d{4}$'
+        example: '2020'
+      description: >
+        Año de inicio para filtrar (formato YYYY). 
+        Debe ser menor o igual a fecha_hasta.
+    fechaHastaParam:
+      in: query
+      name: fecha_hasta
+      required: false
+      schema:
+        type: string
+        pattern: '^\d{4}$'
+        example: '2024'
+      description: >
+        Año de fin para filtrar (formato YYYY). 
+        fecha_desde debe ser menor o igual a fecha_hasta.
+    estadoTramitacionParam:
+      in: query
+      name: estado
+      description: >
+        Estado de tramitación:
+        * `T` - En tramitación
+        * `L` - Publicado
+        * `A` - Solicitud archivo
+        * `C` - Consulta archivo
+        * `I` - Inadmisible
+        * `R` - Rechazado
+        * `E` - Retirado
+        * `V` - Archivado
+        * `N` - Inconstitucional
+      schema:
+        type: string
+        enum: [T, L, A, C, I, R, E, V, N]
+        default: null
+      required: false
+    listaParlamentariosParam:
+      in: query
+      name: listaParlamentarios
+      description: lista de parlamentarios (ejemplo 1212,985)
+      schema:
+        type: string
+      required: false
+    tipoRespuestaOficioDeIncidentesParam:
+      in: query
+      name: tipoSegunRespuesta
+      description: >
+        Tipo según respuesta
+        * 0 - Todos los oficios
+        * 1 - Con respuesta
+        * 2 - Sin respuesta
+      schema:
+        type: number
+        enum: [0, 1, 2]
+        default: 0
+      required: true
+    textoDeBusquedaParam:
+      in: query
+      name: textoBusqueda
+      description: texto de busqueda
+      schema:
+        type: string
+      required: false
+    numeroOficioParam:
+      in: query
+      name: numeroOficio
+      description: numero de oficio (ejemplo 168/INC/2025)
+      schema:
+        type: string
+      required: false
+    desdeParam:
+      in: query
+      name: desde
+      description: fecha desde (formato 28/07/2022)
+      schema:
+        type: string
+        pattern: '^\d{2}/\d{2}/\d{4}$'
+      required: false
+    hastaParam:
+      in: query
+      name: hasta
+      description: fecha hasta  (formato 28/07/2022)
+      schema:
+        type: string
+        pattern: '^\d{2}/\d{2}/\d{4}$'
+      required: false
+    anioInicioParam:
+      in: query
+      name: anioInicio
+      description: año de inicio, formato 2020
+      schema:
+        type: number
+        pattern: '^\d{4}$'
+      required: false
+    anioFinParam:
+      in: query
+      name: anioFin
+      description: año de fin, formato 2024
+      schema:
+        type: number
+        pattern: '^\d{4}$'
+      required: false
+    fechaInicioParam:
+      in: query
+      name: fechaInicio
+      description: fecha de inicio, formato 28/07/2022
+      schema:
+        type: string
+        pattern: '^\d{2}/\d{2}/\d{4}$'
+      required: false
+    fechaFinParam:
+      in: query
+      name: fechaFin
+      description: fecha de fin, formato 28/07/2022
+      schema:
+        type: string
+        pattern: '^\d{2}/\d{2}/\d{4}$'
+      required: false
+    fechaHoraInicioParam:
+      in: query
+      name: fechaHoraInicio
+      description: fecha y hora de inicio, formato 28/07/2022 10:00
+      schema:
+        type: string
+        pattern: '^\d{2}/\d{2}/\d{4} \d{2}:\d{2}$'
+      required: false
+    fechaHoraFinParam:
+      in: query
+      name: fechaHoraFin
+      description: fecha y hora de fin, formato 28/07/2022 10:00
+      schema:
+        type: string
+        pattern: '^\d{2}/\d{2}/\d{4} \d{2}:\d{2}$'
+      required: false
+    iniciativaParam:
+      in: query
+      name: iniciativa
+      description: >
+        tipos de Iniciativa:
+        * `30` - Mensaje
+        * `31` - Moción
+      schema:
+        type: string
+        enum: [30, 31]
+        default: null
+      required: false
+    resideCamaraParam:
+      in: query
+      name: reside_camara
+      description: >
+        Camara de residencia actual del proyecto:
+        * null - Retorna de ambas cámaras
+        * `S` - Senado
+        * `D` - C. Diputados
+      schema:
+        type: string
+        nullable: true
+        enum: ['S', 'D']
+        default: 'S'
+        example: 'S'
+      required: false
+    idTipoComisionParam:
+      in: query
+      name: id_tipo_comision
+      description: identificador de tipo de comision [-10:permanente -11:mixtas -12:unidas -13:Especiales -14:presupuesto].
+      schema:
+        type: integer
+        enum: [10, 11, 12, 13, 14]
+        default: null
+        description: >
+          Tipos de comisiones:
+            * `10` - Permanente
+            * `11` - Mixta
+            * `12` - Unidas
+            * `13` - Especial
+            * `14` - Presupuesto
+      required: false
