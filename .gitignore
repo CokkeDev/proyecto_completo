@@ -9,6 +9,10 @@ backend/evaluation/results/
 backend/evaluation/boletines_qdrant.csv
 backend/evaluation/ground_truth_sample.jsonl
 backend/evaluation/h1_queries.json
+backend/evaluation/ground_truth_sample.jsonl
+backend/evaluation/ground_truth_to_label.jsonl
+backend/evaluation/ground_truth_seed.csv
+backend/evaluation/ground_truth_seed.jsonl
 
 
 

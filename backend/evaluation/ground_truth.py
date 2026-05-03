@@ -21,7 +21,51 @@ from collections import Counter
 
 logger = logging.getLogger(__name__)
 
-GT_FILE = Path(__file__).parent / "ground_truth_sample.jsonl"
+# Buscamos el ground truth en cualquiera de estos nombres (por compatibilidad
+# con archivos existentes de la tesis). Se usa el primero que exista.
+_GT_DIR = Path(__file__).parent
+_GT_CANDIDATES = [
+    _GT_DIR / "ground_truth_sample.jsonl",
+    _GT_DIR / "ground_truth_to_label.jsonl",
+    _GT_DIR / "ground_truth.jsonl",
+]
+
+
+def _resolve_gt_path() -> Path:
+    for candidate in _GT_CANDIDATES:
+        if candidate.exists():
+            return candidate
+    # Si no existe ninguno, devolvemos el "canónico" para que el log sea claro.
+    return _GT_CANDIDATES[0]
+
+
+GT_FILE = _resolve_gt_path()
+
+
+def _coerce_labels(raw) -> list[str]:
+    """
+    Acepta labels en formatos heterogéneos y lo normaliza a list[str]:
+      - ["A", "B"]                           → ["A", "B"]
+      - "A"                                  → ["A"]
+      - "A, B, C"                            → ["A", "B", "C"]
+      - ["A, B, C"]   (string adentro)       → ["A", "B", "C"]
+      - None / "" / []                       → []
+    """
+    if raw is None:
+        return []
+    if isinstance(raw, str):
+        parts = [p.strip() for p in raw.split(",")]
+        return [p for p in parts if p]
+    if isinstance(raw, list):
+        out: list[str] = []
+        for item in raw:
+            if isinstance(item, str):
+                # Cada item podría ser "A, B, C" en una sola string mal escrita
+                out.extend([p.strip() for p in item.split(",") if p.strip()])
+            elif item is not None:
+                out.append(str(item).strip())
+        return [p for p in out if p]
+    return [str(raw).strip()]
 
 
 @dataclass
@@ -44,10 +88,16 @@ class GroundTruthLoader:
 
     def load(self) -> list[GTEntry]:
         if not self.gt_path.exists():
-            logger.error(f"Ground truth no encontrado en {self.gt_path}")
+            logger.error(
+                f"Ground truth no encontrado. Probé: "
+                f"{[str(p) for p in _GT_CANDIDATES]}"
+            )
             return []
 
-        entries = []
+        logger.info(f"Cargando ground truth desde: {self.gt_path}")
+
+        entries: list[GTEntry] = []
+        skipped = 0
         with open(self.gt_path, "r", encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
@@ -55,20 +105,39 @@ class GroundTruthLoader:
                     continue
                 try:
                     data = json.loads(line)
-                    entries.append(
-                        GTEntry(
-                            boletin=data["boletin"],
-                            suma=data["suma"],
-                            labels=data["labels"],
-                            primary_category=data.get("primary_category", data["labels"][0]),
-                            materias=data.get("materias"),
-                        )
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Línea {line_num}: JSON inválido ({e})")
+                    skipped += 1
+                    continue
+
+                boletin = data.get("boletin")
+                suma = data.get("suma")
+                labels = _coerce_labels(data.get("labels"))
+                if not boletin or not suma or not labels:
+                    logger.warning(
+                        f"Línea {line_num}: faltan campos obligatorios "
+                        f"(boletin/suma/labels). Saltada."
                     )
-                except (json.JSONDecodeError, KeyError) as e:
-                    logger.warning(f"Línea {line_num} inválida: {e}")
+                    skipped += 1
+                    continue
+
+                primary = data.get("primary_category") or labels[0]
+
+                entries.append(
+                    GTEntry(
+                        boletin=str(boletin),
+                        suma=str(suma),
+                        labels=labels,
+                        primary_category=str(primary),
+                        materias=data.get("materias"),
+                    )
+                )
 
         self._entries = entries
-        logger.info(f"Ground truth cargado: {len(entries)} entradas.")
+        logger.info(
+            f"Ground truth cargado: {len(entries)} entradas válidas "
+            f"(saltadas: {skipped})."
+        )
         return entries
 
     def get_y_true(self) -> list[list[str]]:

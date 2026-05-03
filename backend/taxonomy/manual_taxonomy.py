@@ -130,6 +130,49 @@ class ManualTaxonomy:
     def get_all_prototype_texts(self) -> dict[str, list[str]]:
         return {code: self.get_prototype_texts(code) for code in TAXONOMY}
 
+    # ── Prototipos a nivel subcategoría ───────────────────────────────────────
+    def get_subcategory_prototype_texts(
+        self, cat_code: str, sub_code: str
+    ) -> list[str]:
+        """
+        Textos prototipo de UNA subcategoría. Usa `ejemplos_positivos`; si están
+        vacíos cae a label + definition + keywords (concatenados como fallback).
+        """
+        sub = (
+            TAXONOMY.get(cat_code, {})
+                    .get("subcategorias", {})
+                    .get(sub_code, {})
+        )
+        texts = list(sub.get("ejemplos_positivos", []))
+        if texts:
+            return texts
+        # Fallback: construir un texto sintético con la metadata
+        label = sub.get("label", sub_code)
+        definition = sub.get("definition", "")
+        keywords = ", ".join(sub.get("keywords", [])[:20])
+        synonyms = ", ".join(sub.get("synonyms", [])[:10])
+        synthetic = " ".join(
+            part for part in [label, definition, keywords, synonyms] if part
+        ).strip()
+        return [synthetic] if synthetic else []
+
+    def get_all_subcategory_prototype_texts(self) -> dict[tuple[str, str], list[str]]:
+        """{(cat_code, sub_code): [texts]} para todas las subcategorías."""
+        out: dict[tuple[str, str], list[str]] = {}
+        for cat_code, cat_data in TAXONOMY.items():
+            for sub_code in cat_data.get("subcategorias", {}):
+                out[(cat_code, sub_code)] = self.get_subcategory_prototype_texts(
+                    cat_code, sub_code
+                )
+        return out
+
+    def get_all_subcategory_codes(self) -> list[str]:
+        """Lista plana de todos los códigos de subcategoría existentes."""
+        out: list[str] = []
+        for cat_data in TAXONOMY.values():
+            out.extend(cat_data.get("subcategorias", {}).keys())
+        return out
+
     # ── Explicación ──────────────────────────────────────────────────────────
     def generate_explanation(
         self,

@@ -59,9 +59,34 @@ class ClosedSetClassifier:
     """
 
     KW_THRESHOLD = 0.25
-    SEMANTIC_THRESHOLD = 0.70
+    SEMANTIC_THRESHOLD = 0.68
     NEGATIVE_MARGIN = 0.05
     MULTI_CAT_MARGIN = 0.15
+
+    # Mínimo de keyword score para asignar subcategoría dentro de un match
+    # semántico de Capa 3 por la vía léxica. Si ninguna subcategoría lo
+    # supera, en vez de devolver POR_CLASIFICAR caemos al fallback
+    # semántico de subcategoría (centroides de ejemplos_positivos).
+    SEMANTIC_SUB_MIN_KW_SCORE = 0.03
+
+    # Umbral de similitud semántica para el fallback de subcategoría.
+    # Si la mejor sub por similitud semántica supera este umbral, se asigna.
+    # Sin esto, los boletines con buen match a la categoría pero vocabulario
+    # divergente del manual quedan en POR_CLASIFICAR — fuente principal de
+    # bajo recall.
+    SUB_SEMANTIC_FALLBACK_THRESHOLD = 0.62
+
+    # ── Reglas anti-falsos-positivos cross-category ──────────────────────────
+    # Cuando una subcategoría secundaria pertenece a una CATEGORÍA distinta a
+    # la del primary (por ejemplo SALUD_PUBLICA → COBERTURA_SANITARIA primary
+    # y EDUCACION → EDUCACION_SUPERIOR secondary), exigimos:
+    #   - Que haya matcheado por regla regex (señal específica del dominio)
+    #   - Confianza mínima alta
+    #   - Estar muy cerca de la confianza del primary
+    # Estos parámetros evitan que el sistema arrastre etiquetas de otra
+    # categoría por keywords incidentales en el texto completo del PDF.
+    CROSS_CAT_MIN_CONFIDENCE = 0.80
+    CROSS_CAT_MARGIN = 0.08
 
     def __init__(
         self,
@@ -79,11 +104,15 @@ class ClosedSetClassifier:
         self._compiled_rules: dict[tuple[str, str], list[re.Pattern]] = {}
         # cat_code → np.ndarray (1024,)  — centroide positivo por categoría
         self._positive_centroids: dict[str, np.ndarray] = {}
+        # (cat_code, sub_code) → np.ndarray (1024,) — centroide positivo de sub
+        # (para fallback semántico cuando keywords no matchean)
+        self._sub_positive_centroids: dict[tuple[str, str], np.ndarray] = {}
         # (cat_code, sub_code) → np.ndarray (1024,) — centroide negativo
         self._negative_centroids: dict[tuple[str, str], np.ndarray] = {}
 
         self._compile_rules()
         self._build_centroids()
+        self._build_sub_positive_centroids()
 
     # ── Inicialización ────────────────────────────────────────────────────────
 
@@ -130,6 +159,43 @@ class ClosedSetClassifier:
         logger.info(
             f"ClosedSetClassifier listo: {len(self._positive_centroids)} centroides positivos, "
             f"{len(self._negative_centroids)} centroides negativos."
+        )
+
+    def _build_sub_positive_centroids(self):
+        """
+        Pre-calcula centroides POSITIVOS por subcategoría (no por categoría).
+        Usados en _best_sub_by_keywords como fallback cuando ningún keyword
+        matchea: en vez de devolver POR_CLASIFICAR (mata recall), elegimos
+        la subcategoría cuyo centroide positivo está más cerca del texto.
+        """
+        for cat_code, cat_data in TAXONOMY.items():
+            for sub_code, sub_data in cat_data.get("subcategorias", {}).items():
+                pos_texts = sub_data.get("ejemplos_positivos", [])
+                if not pos_texts:
+                    # Fallback: usar label + definition + keywords como prototipo
+                    label = sub_data.get("label", sub_code)
+                    definition = sub_data.get("definition", "")
+                    kws = ", ".join(sub_data.get("keywords", [])[:15])
+                    synth = " ".join(p for p in [label, definition, kws] if p).strip()
+                    pos_texts = [synth] if synth else []
+                if not pos_texts:
+                    continue
+                try:
+                    vecs = self.encoder.encode(pos_texts, batch_size=16)
+                    centroid = vecs.mean(axis=0)
+                    norm = np.linalg.norm(centroid)
+                    if norm == 0:
+                        continue
+                    self._sub_positive_centroids[(cat_code, sub_code)] = (
+                        centroid / (norm + 1e-9)
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Error centroide positivo {cat_code}/{sub_code}: {e}"
+                    )
+
+        logger.info(
+            f"Centroides positivos de subcategoría: {len(self._sub_positive_centroids)}."
         )
 
     # ── Clasificación principal ───────────────────────────────────────────────
@@ -199,15 +265,35 @@ class ClosedSetClassifier:
 
         primary = all_matches[0]
 
-        # Mantener subcategorías adicionales, incluso si pertenecen a la misma categoría
-        secondary = [
-            m for m in all_matches[1:]
-            if (
-                m.subcategoria_id != primary.subcategoria_id
-                and m.confianza >= 0.70
-                and m.confianza >= primary.confianza - self.MULTI_CAT_MARGIN
-            )
-        ]
+        # ── Selección de secundarias con reglas distintas según el dominio ──
+        # Misma categoría que primary  → criterio laxo (multi-sub natural)
+        # Categoría distinta a primary → criterio estricto (anti falsos positivos)
+        secondary: list[ClassificationMatch] = []
+        for m in all_matches[1:]:
+            if m.subcategoria_id == primary.subcategoria_id:
+                continue
+
+            same_category = m.categoria_id == primary.categoria_id
+
+            if same_category:
+                # Mismo dominio temático: aceptamos el margen amplio actual
+                if (
+                    m.confianza >= 0.70
+                    and m.confianza >= primary.confianza - self.MULTI_CAT_MARGIN
+                ):
+                    secondary.append(m)
+            else:
+                # Cross-category: exigimos señal fuerte y cercanía al primary.
+                # Esto evita que keywords incidentales (ej. "universidad" en un
+                # PDF sobre donación de sangre) arrastren subcategorías de
+                # otras categorías al resultado final.
+                is_strong_match = m.metodo_match == "regla_regex"
+                if (
+                    is_strong_match
+                    and m.confianza >= self.CROSS_CAT_MIN_CONFIDENCE
+                    and m.confianza >= primary.confianza - self.CROSS_CAT_MARGIN
+                ):
+                    secondary.append(m)
 
         # Evitar sobre-predicción extrema
         secondary = secondary[:4]
@@ -312,6 +398,10 @@ class ClosedSetClassifier:
 
             if calibrated >= self.semantic_threshold:
                 best_sub = self._best_sub_by_keywords(text_lower, cat_code)
+                # Fallback semántico: si la vía léxica no eligió subcategoría,
+                # intentamos por similitud semántica de subcategoría.
+                if not best_sub:
+                    best_sub = self._best_sub_by_semantic(text_vec, cat_code)
                 if best_sub:
                     sub_data = TAXONOMY[cat_code]["subcategorias"][best_sub]
                     matches[(cat_code, best_sub)] = ClassificationMatch(
@@ -326,8 +416,36 @@ class ClosedSetClassifier:
 
         return matches
 
+    def _best_sub_by_semantic(
+        self, text_vec: np.ndarray, cat_code: str
+    ) -> Optional[str]:
+        """
+        Fallback informado: elige la subcategoría cuyo centroide positivo está
+        más cerca del texto (similitud coseno). Solo asigna si supera
+        SUB_SEMANTIC_FALLBACK_THRESHOLD para no asignar arbitrariamente.
+        """
+        best_sub: Optional[str] = None
+        best_calibrated = -1.0
+        for (cc, sub_code), proto in self._sub_positive_centroids.items():
+            if cc != cat_code:
+                continue
+            sim = float(np.dot(text_vec, proto))
+            calibrated = (sim + 1.0) / 2.0
+            if calibrated > best_calibrated:
+                best_calibrated = calibrated
+                best_sub = sub_code
+        if best_sub is None or best_calibrated < self.SUB_SEMANTIC_FALLBACK_THRESHOLD:
+            return None
+        return best_sub
+
     def _best_sub_by_keywords(self, text_lower: str, cat_code: str) -> Optional[str]:
-        """Retorna la subcategoría con mayor overlap de keywords para asignar a un match semántico."""
+        """
+        Retorna la subcategoría con mayor overlap de keywords para asignar a un
+        match semántico. Si ninguna supera SEMANTIC_SUB_MIN_KW_SCORE, devuelve
+        None — antes había un fallback que devolvía la primera del dict, y eso
+        producía falsos positivos sistemáticos cuando el centroide de la
+        categoría era amplio pero no había señal en ninguna subcategoría.
+        """
         best_sub: Optional[str] = None
         best_score = -1.0
 
@@ -340,10 +458,11 @@ class ClosedSetClassifier:
                 best_score = score
                 best_sub = sub_code
 
-        if best_sub is None:
-            # Fallback: primera subcategoría de la categoría
-            subs = list(TAXONOMY[cat_code].get("subcategorias", {}).keys())
-            return subs[0] if subs else None
+        # Si ninguna subcategoría tiene un mínimo de evidencia léxica, no
+        # asignamos. El boletín caerá en POR_CLASIFICAR — preferible a
+        # forzar una subcategoría arbitraria que ensucia las métricas.
+        if best_sub is None or best_score < self.SEMANTIC_SUB_MIN_KW_SCORE:
+            return None
 
         return best_sub
 

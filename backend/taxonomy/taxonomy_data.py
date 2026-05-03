@@ -57,6 +57,9 @@ TAXONOMY: dict = {
                     "Modifica el artículo 159 del Código del Trabajo para regular las causales de terminación del contrato",
                     "Establece el salario mínimo garantizado para trabajadores de jornada parcial",
                     "Regula el trabajo a distancia y teletrabajo",
+                    "Modifica el Código del Trabajo para otorgar permiso especial a trabajadores que sean voluntarios de bomberos",
+                    "Otorga permiso laboral a trabajadores que sean voluntarios de cuerpos de bomberos o cruz roja",
+                    "Establece licencia y fuero laboral para trabajadores que ejercen funciones de bombero voluntario",
                 ],
                 "ejemplos_negativos": [
                     "Aumenta las penas para el delito de robo",
@@ -64,12 +67,18 @@ TAXONOMY: dict = {
                 ],
                 "reglas_semanticas": [
                     r"contrato\s+de\s+trabajo",
-                    r"código\s+del\s+trabajo",
+                    r"c[oó]digo\s+del\s+trabajo",
                     r"despido\s+(injustificado|procedente|improcedente)?",
-                    r"(salario|sueldo|remuneración)\s+mínimo",
-                    r"jornada\s+(laboral|de trabajo|ordinaria)",
+                    r"(salario|sueldo|remuneraci[oó]n)\s+m[ií]nimo",
+                    r"jornada\s+(laboral|de\s+trabajo|ordinaria)",
                     r"teletrabajo|trabajo\s+a\s+distancia",
-                    r"finiquito|indemnización\s+por\s+años",
+                    r"finiquito|indemnizaci[oó]n\s+por\s+a[ñn]os",
+                    # Permisos y licencias laborales (señales fuertes)
+                    r"permiso(s)?\s+(laboral|especial|para\s+trabajadores)",
+                    r"licencia(s)?\s+(laboral(es)?|especial(es)?\s+(para|de)\s+trabajadores)",
+                    r"fuero\s+(laboral|maternal|sindical)",
+                    r"trabajador(es)?\s+que\s+sean\s+voluntarios?",
+                    r"otorga(r)?\s+(permiso|licencia)\s+(laboral|especial)",
                 ],
             },
             "SEGURIDAD_SOCIAL": {
@@ -228,7 +237,11 @@ TAXONOMY: dict = {
         "subcategorias": {
             "COBERTURA_SANITARIA": {
                 "label": "Acceso y cobertura sanitaria",
-                "definition": "FONASA, ISAPREs, GES/AUGE, listas de espera, copagos, y acceso universal a la salud.",
+                "definition": (
+                    "FONASA, ISAPREs, GES/AUGE, listas de espera, copagos, acceso "
+                    "universal a la salud, prestaciones sanitarias y donación / "
+                    "trasplante de órganos y sangre."
+                ),
                 "keywords": [
                     "FONASA", "ISAPRE", "GES", "AUGE", "cobertura de salud",
                     "plan de salud", "prima de salud", "tabla de factores",
@@ -236,16 +249,25 @@ TAXONOMY: dict = {
                     "copago", "prestación de salud", "ley de isapres",
                     "portabilidad financiera", "superación de crisis isapres",
                     "acceso universal", "salud universal", "garantías explícitas",
+                    # ── Donación y trasplantes (prestaciones sanitarias) ─────
+                    "donación de sangre", "donación altruista de sangre",
+                    "donante de sangre", "banco de sangre",
+                    "donación de órganos", "trasplante", "trasplante de órganos",
+                    "donante de órganos", "donación cruzada", "donante",
                 ],
                 "synonyms": ["seguro de salud", "previsión de salud", "aseguramiento sanitario"],
-                "etiquetas": ["FONASA", "ISAPRE", "GES_AUGE", "lista_espera", "cobertura"],
+                "etiquetas": ["FONASA", "ISAPRE", "GES_AUGE", "lista_espera", "cobertura", "donacion", "trasplante"],
                 "ejemplos_positivos": [
                     "Modifica la ley de ISAPREs para eliminar la tabla de factores discriminatoria",
                     "Amplía las garantías del plan GES para incluir nuevas enfermedades",
+                    "Modifica diversos cuerpos legales con el objeto de fomentar la donación altruista de sangre",
+                    "Modifica la ley para ampliar la donación cruzada de órganos entre personas vivas",
+                    "Establece protocolo nacional de bancos de sangre y donantes voluntarios",
                 ],
                 "ejemplos_negativos": [
                     "Regula el precio de los medicamentos en farmacias",
                     "Establece el sistema de cotizaciones para AFP",
+                    "Modifica la ley general de educación superior",
                 ],
                 "reglas_semanticas": [
                     r"\bFONASA\b|\bISAPRE\b",
@@ -254,6 +276,12 @@ TAXONOMY: dict = {
                     r"lista\s+de\s+espera",
                     r"plan\s+de\s+salud",
                     r"tabla\s+de\s+factores",
+                    # Donación / trasplante
+                    r"donaci[oó]n\s+(altruista\s+)?(de\s+)?sangre",
+                    r"donaci[oó]n\s+(cruzada\s+)?(de\s+)?[oó]rganos?",
+                    r"trasplante(\s+de\s+[oó]rganos?)?",
+                    r"banco\s+de\s+sangre",
+                    r"donante(s)?\s+(de\s+)?(sangre|[oó]rganos?)?",
                 ],
             },
             "MEDICAMENTOS": {
@@ -436,10 +464,10 @@ TAXONOMY: dict = {
                 "label": "Educación superior",
                 "definition": "Universidades, institutos profesionales, centros de formación técnica, acreditación, autonomía universitaria y regulación del sector.",
                 "keywords": [
-                    "universidad", "universidades", "instituto profesional", "IP", "CFT", "centro de formación técnica",
-                    "educación superior", "CRUCH", "CNA", "acreditación", "autonomía universitaria",
-                    "rector", "aranceles", "matrícula universitaria",
-                    "CNED", "SIES", "estadísticas universitarias",
+                    "universidad", "universidades", "instituto profesional", "centro de formación técnica",
+                    "educación superior", "CRUCH", "CNA", "acreditación universitaria",
+                    "autonomía universitaria", "rector", "aranceles universitarios",
+                    "matrícula universitaria", "CNED", "SIES", "estadísticas universitarias",
                     "lucro en educación", "educación con fines de lucro",
                 ],
                 "synonyms": ["universidades", "estudios superiores"],
@@ -452,13 +480,23 @@ TAXONOMY: dict = {
                 "ejemplos_negativos": [
                     "Aumenta la subvención a colegios municipales",
                     "Crea beca para educación técnica",
+                    # ── Anti-falsos-positivos por menciones casuales en PDFs ──
+                    "Modifica diversos cuerpos legales para fomentar la donación altruista de sangre",
+                    "Establece protocolo nacional de bancos de sangre y donantes voluntarios",
+                    "Modifica la ley para ampliar la donación cruzada de órganos entre personas vivas",
+                    "Crea sistema de incentivos para donación de órganos y trasplantes",
+                    "Regula campañas de promoción de la salud realizadas en establecimientos educacionales",
                 ],
                 "reglas_semanticas": [
-                    r"universidad(es)?|educación\s+superior",
-                    r"(instituto\s+profesional|IP|CFT|centro\s+de\s+formación\s+técnica)",
+                    # Las reglas exigen contexto: ya no basta con "universidad" suelta
+                    r"educaci[oó]n\s+superior",
+                    r"sistema\s+(universitario|de\s+educaci[oó]n\s+superior)",
+                    r"acreditaci[oó]n\s+(universitaria|institucional)",
+                    r"autonom[ií]a\s+universitaria",
                     r"\bCRUCH\b|\bCNA\b|\bCNED\b",
-                    r"acreditación\s+(universitaria|institucional)",
-                    r"lucro\s+en\s+educación|fines\s+de\s+lucro",
+                    r"(arancel(es)?|matr[ií]cula)\s+universitaria?s?",
+                    r"lucro\s+en\s+educaci[oó]n|fines\s+de\s+lucro\s+en\s+educaci[oó]n",
+                    r"institutos?\s+profesionales?|centros?\s+de\s+formaci[oó]n\s+t[eé]cnica",
                 ],
             },
             "FINANCIAMIENTO_EDUCACIONAL": {
@@ -638,12 +676,18 @@ TAXONOMY: dict = {
                 "ejemplos_negativos": [
                     "Regula las emisiones de gases de efecto invernadero",
                     "Modifica el código de aguas",
+                    # Anti-falsos-positivos: textos laborales o de bomberos
+                    # mencionan CONAF, fauna silvestre o incendios forestales
+                    # como contexto pero su tema central es laboral/seguridad.
+                    "Modifica el Código del Trabajo para otorgar permiso a trabajadores voluntarios de bomberos",
+                    "Establece beneficios laborales para voluntarios de cuerpos de bomberos forestales",
+                    "Regula la jornada laboral de brigadistas que combaten incendios forestales",
                 ],
                 "reglas_semanticas": [
                     r"biodiversidad|especie(s)?\s+(protegida|en\s+peligro|amenazada)",
                     r"parque\s+nacional|área(s)?\s+(silvestre(s)?\s+)?protegida(s)?",
                     r"sitio(s)?\s+prioritario(s)?|sistema\s+nacional\s+de\s+áreas\s+protegidas",
-                    r"\bCONAF\b|\bSAG\b|\bSBAP\b|servicio\s+de\s+biodiversidad",
+                    r"\bSBAP\b|servicio\s+de\s+biodiversidad",  # CONAF/SAG removidos: aparecen en muchos contextos no-ambientales
                     r"ley\s+(n°\s*)?21\.600",
                     r"humedal|turbera|borde\s+costero",
                     r"flora\s+nativa|fauna\s+silvestre|conservación\s+de\s+especies",
@@ -821,7 +865,13 @@ TAXONOMY: dict = {
             },
             "CRIMEN_ORGANIZADO": {
                 "label": "Crimen organizado y narcotráfico",
-                "definition": "Narcotráfico, lavado de activos, tráfico de personas, asociación ilícita, terrorismo y crimen organizado.",
+                "definition": (
+                    "Narcotráfico, lavado de activos como tipo penal autónomo, "
+                    "tráfico de personas, asociación ilícita, terrorismo y "
+                    "crimen organizado. NO incluye proyectos tributarios que "
+                    "mencionen lavado de activos/UAF como obligación de "
+                    "reporte (esos van en ECONOMIA_FINANZAS / TRIBUTACION)."
+                ),
                 "keywords": [
                     "narcotráfico", "tráfico de drogas", "drogas", "estupefacientes",
                     "lavado de activos", "lavado de dinero", "blanqueo",
@@ -840,14 +890,26 @@ TAXONOMY: dict = {
                 "ejemplos_negativos": [
                     "Regula los procedimientos de detención policial",
                     "Establece medidas de protección para víctimas de VIF",
+                    # Anti-falsos-positivos: textos tributarios mencionan lavado
+                    # de activos / UAF / financiamiento del terrorismo como
+                    # obligaciones de reporte, pero su tema central es fiscal.
+                    "Dicta normas para asegurar el cumplimiento de las obligaciones tributarias",
+                    "Modifica el Código Tributario para combatir la evasión y elusión fiscal",
+                    "Establece obligaciones de reporte ante la UAF para contribuyentes",
+                    "Regula el secreto bancario y abonos bancarios para fines tributarios",
+                    "Modifica normas sobre intercambio de información tributaria con otros países",
                 ],
                 "reglas_semanticas": [
-                    r"narcotráfico|tráfico\s+de\s+drogas?",
-                    r"lavado\s+de\s+(activos|dinero|bienes)|blanqueo",
-                    r"tráfico\s+de\s+personas|trata\s+de\s+personas",
-                    r"asociación\s+ilícita|banda\s+organizada|crimen\s+organizado",
-                    r"terrorismo|financiamiento\s+del\s+terrorismo",
-                    r"tráfico\s+de\s+armas|porte\s+ilegal\s+de\s+armas",
+                    # Las reglas exigen contexto penal: que se hable del DELITO,
+                    # no de obligaciones administrativas o reporte tributario.
+                    r"narcotr[aá]fico|tr[aá]fico\s+de\s+drogas?",
+                    r"(delito|tipo\s+penal|sanci[oó]n\s+penal|tipifica)\s+(de\s+)?lavado\s+de\s+(activos|dinero|bienes)",
+                    r"lavado\s+de\s+(activos|dinero|bienes)\s+(como\s+delito|tipificado|previsto\s+en\s+el\s+art[ií]culo)",
+                    r"tr[aá]fico\s+de\s+personas|trata\s+de\s+personas",
+                    r"asociaci[oó]n\s+il[ií]cita|banda\s+organizada|crimen\s+organizado",
+                    r"financiamiento\s+del\s+terrorismo\s+(como\s+delito|tipificado)",
+                    r"tr[aá]fico\s+de\s+armas|porte\s+ilegal\s+de\s+armas",
+                    r"ley\s+20\.000|ley\s+19\.913",  # Leyes específicas de drogas y lavado
                 ],
             },
             "VIOLENCIA_GENERO": {
@@ -936,21 +998,32 @@ TAXONOMY: dict = {
         "subcategorias": {
             "TRIBUTACION": {
                 "label": "Tributación e impuestos",
-                "definition": "Impuesto a la renta, IVA, tributación de empresas, evasión y elusión fiscal, SII y reforma tributaria.",
+                "definition": "Impuesto a la renta, IVA, tributación de empresas, evasión y elusión fiscal, SII, código tributario y reforma tributaria.",
                 "keywords": [
                     "impuesto a la renta", "renta", "tributación", "IVA",
                     "reforma tributaria", "impuesto corporativo", "pago de impuestos",
-                    "evasión fiscal", "elusión tributaria", "planificación tributaria agresiva",
+                    "evasión fiscal", "evasión de impuestos", "evasión tributaria",
+                    "elusión tributaria", "elusión fiscal",
+                    "planificación tributaria agresiva",
                     "SII", "Servicio de Impuestos Internos", "TGR", "Tesorería",
                     "declaración de renta", "devolución de impuestos", "crédito fiscal",
                     "impuesto al patrimonio", "impuesto a los súper ricos",
+                    # Términos centrales que faltaban
+                    "código tributario", "obligaciones tributarias", "obligación tributaria",
+                    "contribuyente", "contribuyentes", "responsabilidad fiscal",
+                    "secreto bancario", "intercambio de información tributaria",
+                    "norma anti-elusión", "norma general anti-elusión",
+                    "comercio ilegal", "informalidad tributaria",
                 ],
-                "synonyms": ["reforma tributaria", "impuestos", "sistema tributario"],
-                "etiquetas": ["impuestos", "IVA", "renta", "SII", "reforma_tributaria", "evasion"],
+                "synonyms": ["reforma tributaria", "impuestos", "sistema tributario", "fisco"],
+                "etiquetas": ["impuestos", "IVA", "renta", "SII", "reforma_tributaria", "evasion", "elusion", "codigo_tributario"],
                 "ejemplos_positivos": [
                     "Establece un impuesto al patrimonio para personas con activos superiores a 5 millones de dólares",
                     "Modifica el impuesto corporativo para financiar la reforma previsional",
                     "Fortalece las facultades del SII para combatir la evasión tributaria",
+                    "Dicta normas para asegurar el cumplimiento de las obligaciones tributarias",
+                    "Modifica el Código Tributario para combatir la evasión y elusión fiscal",
+                    "Regula el levantamiento del secreto bancario para fines tributarios",
                 ],
                 "ejemplos_negativos": [
                     "Regula el sistema financiero y bancario",
@@ -960,11 +1033,21 @@ TAXONOMY: dict = {
                     "delitos",
                 ],
                 "reglas_semanticas": [
-                    r"impuesto\s+(a\s+la\s+renta|al\s+valor\s+agregado|IVA|al\s+patrimonio)",
+                    r"impuesto\s+(a\s+la\s+renta|al\s+valor\s+agregado|al\s+patrimonio)",
+                    r"\bIVA\b",
                     r"reforma\s+tributaria|sistema\s+tributario",
                     r"\bSII\b|servicio\s+de\s+impuestos\s+internos",
-                    r"evasión\s+(fiscal|tributaria)|elusión\s+tributaria",
-                    r"tributación|carga\s+tributaria",
+                    # Aceptar las variaciones más comunes en lenguaje legal
+                    r"evasi[oó]n\s+(fiscal|tributaria|de\s+impuestos)",
+                    r"elusi[oó]n\s+(fiscal|tributaria)",
+                    r"tributaci[oó]n|carga\s+tributaria",
+                    r"c[oó]digo\s+tributario",
+                    r"obligaci[oó]n(es)?\s+tributaria(s)?",
+                    r"contribuyente(s)?",
+                    r"responsabilidad\s+fiscal",
+                    r"secreto\s+bancario\s+(para|en|tributari)",
+                    r"intercambio\s+de\s+informaci[oó]n\s+(tributaria|financiera)",
+                    r"norma(s)?\s+(general\s+)?anti[-\s]?elusi[oó]n",
                 ],
             },
             "SISTEMA_FINANCIERO": {
@@ -1220,13 +1303,21 @@ TAXONOMY: dict = {
                 "ejemplos_negativos": [
                     "Regula la adopción de menores por parte de parejas",
                     "Establece derechos territoriales para pueblos indígenas",
+                    # ── Anti-falsos-positivos: textos que cayeron en
+                    # IGUALDAD_NO_DISCRIMINACION por el fallback de Capa 3
+                    # cuando ninguna sub específica matcheaba ──
+                    "Reajusta el ingreso mínimo mensual y la asignación familiar",
+                    "Modifica diversos cuerpos legales para fomentar la donación altruista de sangre",
+                    "Aprueba el tratado bilateral entre la República de Chile y otro Estado",
+                    "Convención sobre cumplimiento de obligaciones del tratado entre repúblicas",
+                    "Modifica el Código del Trabajo en materia de contratos colectivos",
                 ],
                 "reglas_semanticas": [
-                    r"ley\s+Zamudio|ley\s+antidiscriminación",
-                    r"discriminación\s+(arbitraria|por\s+género|racial|laboral)",
-                    r"matrimonio\s+igualitario|AUC|acuerdo\s+de\s+unión\s+civil",
-                    r"LGBTQ?|orientación\s+sexual|identidad\s+de\s+género",
-                    r"discapacidad|inclusión\s+(laboral|social)",
+                    r"ley\s+Zamudio|ley\s+antidiscriminaci[oó]n",
+                    r"discriminaci[oó]n\s+(arbitraria|por\s+g[eé]nero|racial|laboral)",
+                    r"matrimonio\s+igualitario|AUC|acuerdo\s+de\s+uni[oó]n\s+civil",
+                    r"LGBTQ?|orientaci[oó]n\s+sexual|identidad\s+de\s+g[eé]nero",
+                    r"discapacidad|inclusi[oó]n\s+(laboral|social)",
                 ],
             },
             "DERECHOS_INFANCIA": {
@@ -1742,13 +1833,18 @@ TAXONOMY: dict = {
         "subcategorias": {
             "REFORMA_CONSTITUCIONAL": {
                 "label": "Reforma constitucional y proceso constituyente",
-                "definition": "Nueva Constitución, plebiscito, convención constitucional, reforma a la Carta Magna y proceso constituyente.",
+                "definition": (
+                    "Modificación, reforma o reemplazo de la Constitución Política. "
+                    "NO incluye proyectos que solo citen la Constitución como marco "
+                    "normativo (esos son leyes ordinarias)."
+                ),
                 "keywords": [
-                    "constitución", "nueva constitución", "reforma constitucional",
+                    "nueva constitución", "reforma constitucional",
                     "plebiscito", "convención constitucional", "asamblea constituyente",
-                    "carta fundamental", "carta magna",
-                    "apruebo", "rechazo", "proceso constituyente",
-                    "artículo constitucional", "ley orgánica constitucional",
+                    "proceso constituyente",
+                    "modifica la Constitución Política",
+                    "reforma a la carta fundamental",
+                    "modificación constitucional",
                 ],
                 "synonyms": ["proceso constituyente", "nueva carta magna", "reforma constitucional"],
                 "etiquetas": ["constitucion", "plebiscito", "convencion_constitucional", "reforma_constitucional"],
@@ -1756,16 +1852,35 @@ TAXONOMY: dict = {
                     "Convoca a plebiscito para iniciar el proceso de nueva constitución",
                     "Establece el mecanismo de reforma constitucional mediante convención mixta",
                     "Modifica la Constitución Política de la República para reconocer nuevos derechos",
+                    "Reforma constitucional que elimina la iniciativa exclusiva del Presidente",
                 ],
                 "ejemplos_negativos": [
                     "Reforma el sistema electoral para elecciones parlamentarias",
                     "Modifica la ley orgánica de municipalidades",
+                    # ── Anti-falsos-positivos: textos que solo CITAN la
+                    # Constitución como marco pero no la reforman ──
+                    "Modifica diversos cuerpos legales para fomentar la donación altruista de sangre",
+                    "Dicta normas para asegurar el cumplimiento de las obligaciones tributarias",
+                    "Aprueba el tratado bilateral entre la República de Chile y otro Estado",
+                    "Modifica la ley sobre acceso a la información pública",
+                    "Reajusta el ingreso mínimo mensual y la asignación familiar",
+                    "Establece protocolo de prestaciones de salud en establecimientos médicos",
                 ],
                 "reglas_semanticas": [
-                    r"(nueva\s+)?constitución|reforma\s+constitucional",
-                    r"plebiscito|convención\s+constitucional|asamblea\s+constituyente",
-                    r"carta\s+(fundamental|magna)",
-                    r"ley\s+orgánica\s+constitucional",
+                    # Reglas reescritas: exigen el VERBO de reforma/modificación
+                    # explícitamente sobre la Constitución, no solo mencionar
+                    # la palabra "constitución" o "carta fundamental".
+                    r"reforma(s)?\s+constitucional(es)?",
+                    r"reforma\s+(de\s+|a\s+)?la\s+(constituci[oó]n|carta\s+(fundamental|magna))",
+                    r"modifica(r)?\s+la\s+constituci[oó]n\s+pol[ií]tica",
+                    r"modificaci[oó]n\s+(de\s+|a\s+)?la\s+constituci[oó]n",
+                    r"nueva\s+constituci[oó]n",
+                    r"plebiscito\s+(constitucional|nacional|de\s+entrada|de\s+salida)",
+                    r"convenci[oó]n\s+constitucional|asamblea\s+constituyente",
+                    r"proceso\s+constituyente",
+                    # NOTA: removidas las reglas que matcheaban "constitución"
+                    # o "carta fundamental" sueltas porque son citas marco que
+                    # aparecen en CASI todos los proyectos de ley chilenos.
                 ],
             },
             "DESCENTRALIZACION": {
@@ -1973,30 +2088,50 @@ TAXONOMY: dict = {
             },
             "COOPERACION_INTERNACIONAL": {
                 "label": "Cooperación internacional",
-                "definition": "Relaciones internacionales, cooperación bilateral y multilateral entre Estados.",
+                "definition": (
+                    "Relaciones internacionales, cooperación bilateral y "
+                    "multilateral entre Estados. NO incluye tratados de "
+                    "intercambio de información tributaria/financiera (esos "
+                    "van en ECONOMIA_FINANZAS / TRIBUTACION o SISTEMA_FINANCIERO)."
+                ),
                 "keywords": [
                     "cooperación internacional", "relaciones exteriores",
                     "acuerdo bilateral", "cooperación entre países",
-                    "integración internacional"
+                    "integración internacional", "tratado de paz",
+                    "convenio bilateral", "asistencia internacional",
                 ],
                 "synonyms": ["relaciones internacionales"],
                 "etiquetas": ["cooperacion", "relaciones_exteriores"],
                 "ejemplos_positivos": [
-                    "Establece cooperación entre Chile y otros países"
+                    "Establece cooperación entre Chile y otros países en materia educativa",
+                    "Aprueba el tratado de cooperación cultural con la República Argentina",
+                    "Acuerdo de cooperación en investigación científica entre la República de Chile y la República Federal de Alemania",
                 ],
                 "ejemplos_negativos": [
                     "Regula transporte",
-                    "Modifica normas laborales"
+                    "Modifica normas laborales",
+                    # Anti-falsos-positivos: estos textos mencionan "República de"
+                    # u otros estados pero su tema central NO es cooperación
+                    # internacional sino tributación / finanzas.
+                    "Dicta normas para asegurar el cumplimiento de las obligaciones tributarias",
+                    "Modifica el Código Tributario para combatir la evasión y elusión fiscal",
+                    "Regula el secreto bancario y abonos bancarios para fines tributarios",
                 ],
                 "reglas_semanticas": [
-                    r"cooperación\s+internacional",
-                    r"acuerdo\s+bilateral",
-                    r"relaciones\s+entre\s+estados"
-                    r"acuerdo\s+entre\s+el\s+gobierno",
+                    # Reglas específicas: requieren contexto de cooperación
+                    # explícita, no solo mencionar otro país o "República de".
                     r"cooperaci[oó]n\s+internacional",
-                    r"relaciones\s+bilaterales",
-                    r"entre\s+la\s+rep[uú]blica\s+de",
-                    r"convenio\s+entre\s+pa[ií]ses",
+                    r"acuerdo\s+bilateral|relaciones\s+bilaterales",
+                    r"acuerdo\s+entre\s+el\s+gobierno\s+de\s+la\s+rep[uú]blica\s+de",
+                    r"tratado\s+(internacional|bilateral|multilateral|de\s+paz)",
+                    r"convenio\s+entre\s+pa[ií]ses|convenio\s+multilateral",
+                    r"asistencia\s+internacional|cooperaci[oó]n\s+t[eé]cnica",
+                    r"integraci[oó]n\s+regional|integraci[oó]n\s+latinoamericana",
+                    r"organismos?\s+internacionales?",
+                    # NOTA: removida r"entre\s+la\s+rep[uú]blica\s+de" porque
+                    # matcheaba cualquier proyecto que mencione "República de
+                    # Chile" o "República de [país]" en cláusulas de tratados
+                    # tributarios — produce falsos positivos masivos.
                 ],
             },
             "PATRIMONIO_CULTURAL": {
@@ -2100,11 +2235,26 @@ TAXONOMY: dict = {
             ],
             "synonyms": ["movilidad urbana", "transporte de pasajeros"],
             "etiquetas": ["buses", "metro", "taxis", "pasajeros"],
+            # Las reglas usan \b (word boundaries) para evitar que palabras
+            # cortas ("bus", "metro", "colectivo") matcheen como subcadena
+            # dentro de "abuso", "metropolitano", "contratos colectivos",
+            # etc. — fuente común de falsos positivos cross-category.
             "reglas_semanticas": [
-                r"transporte\s+público",
-                r"bus(es)?|metro|taxi(s)?|colectivo(s)?",
-                r"transporte\s+(escolar|de\s+pasajeros)",
-                r"empresa(s)?\s+de\s+transporte"
+                r"transporte\s+p[uú]blico",
+                r"\b(bus(es)?|micro(s)?|taxi(s)?)\b",
+                r"\bmetro\s+(de|que|y|en|del|el|para|durante)\b",  # contexto requerido
+                r"colectivos?\s+(urbanos?|interurbanos?|de\s+pasajeros?|de\s+transporte)",
+                r"transporte\s+(escolar|de\s+pasajeros|remunerado)",
+                r"empresa(s)?\s+de\s+transporte",
+                r"servicio\s+de\s+transporte\s+(p[uú]blico|de\s+pasajeros)",
+                r"tarifa(s)?\s+de\s+transporte",
+                r"red\s+metropolitana\s+de\s+movilidad",
+            ],
+            "ejemplos_negativos": [
+                "Reajusta el ingreso mínimo mensual y la asignación familiar",
+                "Modifica el Código del Trabajo en materia de contratos colectivos",
+                "Regula la negociación colectiva en empresas de la Región Metropolitana",
+                "Sanciona los abusos del empleador en jornadas extraordinarias",
             ],
         },
 
@@ -2387,32 +2537,39 @@ _EXTRA_TAXONOMY_RULES = {
                 ],
             },
             "EDUCACION_SUPERIOR": {
+                # NOTA: las reglas de educación superior ahora exigen CONTEXTO
+                # educacional explícito. Antes había reglas tipo
+                # `r"universidad(es)?"` y `r"\bIP\b"` que matcheaban cualquier
+                # mención casual y disparaban falsos positivos cross-category
+                # (ej. PDFs de donación de sangre que mencionan campañas
+                # universitarias). Las nuevas reglas requieren que la palabra
+                # esté en contexto del sistema educativo terciario.
                 "keywords": [
-                    "educación superior", "educación universitaria", "universidad", "universidades",
-                    "instituto profesional", "institutos profesionales", "centro de formación técnica", "CFT", "IP",
+                    "educación superior", "educación universitaria",
                     "subsecretaría de educación superior", "superintendencia de educación superior",
-                    "acreditación universitaria", "acreditación institucional", "CNA", "CRUCH", "CNED",
-                    "arancel universitario", "matrícula universitaria", "pregrado", "postgrado",
-                    "licenciamiento institucional", "autonomía universitaria", "plantel universitario",
-                    "carrera universitaria", "calidad de la educación superior"
+                    "acreditación universitaria", "acreditación institucional",
+                    "CNA", "CRUCH", "CNED",
+                    "arancel universitario", "matrícula universitaria",
+                    "licenciamiento institucional", "autonomía universitaria",
+                    "carrera universitaria", "calidad de la educación superior",
                 ],
-                "synonyms": ["educación terciaria", "sector universitario", "instituciones de educación superior"],
+                "synonyms": [
+                    "educación terciaria", "sector universitario",
+                    "instituciones de educación superior",
+                ],
                 "reglas_semanticas": [
-                    r"educación\s+(superior|universitaria|terciaria)",
-                    r"universidad(es)?|plantel(es)?\s+universitario(s)?|carrera(s)?\s+universitaria(s)?",
-                    r"institutos?\s+profesionales?|centros?\s+de\s+formación\s+técnica|\bCFT\b|\bIP\b",
-                    r"subsecretaría\s+de\s+educación\s+superior|superintendencia\s+de\s+educación\s+superior",
-                    r"acreditación\s+(universitaria|institucional)|\bCNA\b|\bCRUCH\b|\bCNED\b",
-                    r"pregrado|postgrado|licenciamiento\s+institucional|autonomía\s+universitaria",
-                    r"calidad\s+de\s+(la\s+)?educación\s+superior|arancel(es)?\s+universitario(s)?"
-                    r"(educaci[oó]n\s+superior)",
-                    r"(universidad(es)?)",
-                    r"(instituto\s+profesional)",
-                    r"(CFT)",
-                    r"(educacion\s+superior)",
-                    r"(universidad(es)?)",
-                    r"(instituto\s+profesional)",
-                    r"(centro\s+de\s+formacion\s+tecnica|\bcft\b)",
+                    r"educaci[oó]n\s+(superior|universitaria|terciaria)",
+                    r"sistema\s+(universitario|de\s+educaci[oó]n\s+superior)",
+                    r"ley\s+general\s+de\s+educaci[oó]n\s+superior",
+                    r"subsecretar[ií]a\s+de\s+educaci[oó]n\s+superior",
+                    r"superintendencia\s+de\s+educaci[oó]n\s+superior",
+                    r"acreditaci[oó]n\s+(universitaria|institucional)",
+                    r"\bCNA\b|\bCRUCH\b|\bCNED\b|\bSIES\b",
+                    r"licenciamiento\s+institucional|autonom[ií]a\s+universitaria",
+                    r"arancel(es)?\s+universitario(s)?|matr[ií]cula\s+universitaria",
+                    r"calidad\s+de\s+(la\s+)?educaci[oó]n\s+superior",
+                    r"plantel(es)?\s+universitario(s)?|carrera(s)?\s+universitaria(s)?",
+                    r"institutos?\s+profesionales?|centros?\s+de\s+formaci[oó]n\s+t[eé]cnica",
                 ],
             },
             "FORMACION_TECNICA": {
@@ -2437,29 +2594,38 @@ _EXTRA_TAXONOMY_RULES = {
     "MEDIO_AMBIENTE": {
         "subcategorias": {
             "BIODIVERSIDAD": {
+                # Reglas reescritas: las versiones anteriores tenían una coma
+                # faltante que rompía un patrón, y una regla `r"(ecosistema(s)?)"`
+                # tan genérica que matcheaba cualquier mención casual en
+                # proyectos no-ambientales (ej. bomberos voluntarios → PDF
+                # menciona "ecosistemas forestales" → falso positivo).
                 "keywords": [
-                    "biodiversidad genética", "diversidad biológica", "preservación de la biodiversidad",
-                    "conservación de la biodiversidad", "conservación de ecosistemas",
-                    "ecosistemas nativos", "patrimonio natural", "áreas protegidas",
-                    "Sistema Nacional de Áreas Protegidas", "SNAP", "SBAP",
+                    "biodiversidad genética", "diversidad biológica",
+                    "preservación de la biodiversidad", "conservación de la biodiversidad",
+                    "conservación de ecosistemas", "ecosistemas nativos", "patrimonio natural",
+                    "áreas protegidas", "Sistema Nacional de Áreas Protegidas", "SNAP", "SBAP",
                     "Servicio de Biodiversidad y Áreas Protegidas", "sitios prioritarios",
-                    "sitio prioritario", "recalificación de sitios prioritarios", "humedales urbanos",
-                    "santuarios de la naturaleza", "parques nacionales", "reservas nacionales",
-                    "monumentos naturales", "flora y fauna", "especies nativas", "especies amenazadas"
+                    "sitio prioritario", "recalificación de sitios prioritarios",
+                    "humedales urbanos", "santuarios de la naturaleza",
+                    "parques nacionales", "reservas nacionales",
+                    "monumentos naturales", "flora y fauna",
+                    "especies nativas", "especies amenazadas",
                 ],
                 "reglas_semanticas": [
-                    r"biodiversidad\s+genética|diversidad\s+biológica",
-                    r"preservación\s+de\s+la\s+biodiversidad|conservación\s+de\s+(la\s+)?biodiversidad",
-                    r"conservación\s+de\s+ecosistemas|ecosistemas\s+nativos|patrimonio\s+natural",
-                    r"servicio\s+de\s+biodiversidad\s+y\s+áreas\s+protegidas|\bSBAP\b",
-                    r"sistema\s+nacional\s+de\s+áreas\s+protegidas|\bSNAP\b",
-                    r"sitios?\s+prioritarios?|recalificación\s+de\s+sitios?\s+prioritarios?",
+                    r"biodiversidad\s+gen[eé]tica|diversidad\s+biol[oó]gica",
+                    r"(preservaci[oó]n|conservaci[oó]n|protecci[oó]n)\s+de\s+(la\s+)?biodiversidad",
+                    r"conservaci[oó]n\s+de\s+ecosistemas|ecosistemas\s+nativos|patrimonio\s+natural",
+                    r"servicio\s+de\s+biodiversidad\s+y\s+[aá]reas\s+protegidas|\bSBAP\b",
+                    r"sistema\s+nacional\s+de\s+[aá]reas\s+protegidas|\bSNAP\b",
+                    r"sitios?\s+prioritarios?|recalificaci[oó]n\s+de\s+sitios?\s+prioritarios?",
                     r"humedales?\s+urbanos?|santuarios?\s+de\s+la\s+naturaleza",
                     r"parques?\s+nacionales?|reservas?\s+nacionales?|monumentos?\s+naturales?",
-                    r"flora\s+y\s+fauna|especies?\s+(nativas?|amenazadas?|protegidas?)"
-                    r"(conservaci[oó]n\s+de\s+especies)",
-                    r"(protecci[oó]n\s+de\s+la\s+fauna)",
-                    r"(ecosistema(s)?)",
+                    r"flora\s+y\s+fauna|especies?\s+(nativas?|amenazadas?|protegidas?)",
+                    r"conservaci[oó]n\s+de\s+especies|protecci[oó]n\s+de\s+(la\s+)?fauna\s+(nativa|silvestre)",
+                    # NOTA: removida r"(ecosistema(s)?)" porque matcheaba
+                    # cualquier texto que mencione "ecosistema" sin contexto.
+                    # Si un proyecto sí trata de ecosistemas, lo hará en
+                    # alguno de los patrones específicos de arriba.
                 ],
             },
             "PLANIFICACION_TERRITORIAL": {

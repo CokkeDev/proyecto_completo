@@ -39,6 +39,8 @@ class EmbeddingClassifier:
 
         # {cat_code: np.ndarray (1024,)}
         self._prototypes: dict[str, np.ndarray] = {}
+        # {sub_code: np.ndarray (1024,)} — se construye lazy en el primer uso
+        self._sub_prototypes: dict[str, np.ndarray] = {}
         self._build_prototypes()
 
     # ── Construcción de prototipos ────────────────────────────────────────────
@@ -89,3 +91,58 @@ class EmbeddingClassifier:
     def get_prototypes(self) -> dict[str, np.ndarray]:
         """Retorna el diccionario de prototipos (para clustering emergente)."""
         return self._prototypes
+
+    # ── Predicción a nivel subcategoría ──────────────────────────────────────
+    def _build_sub_prototypes(self) -> None:
+        """
+        Construye prototipos por subcategoría a partir de los `ejemplos_positivos`,
+        cayendo a `label + definition + keywords` cuando no hay ejemplos.
+        Se ejecuta una sola vez (lazy).
+        """
+        if self._sub_prototypes:
+            return
+
+        sub_texts = self.taxonomy.get_all_subcategory_prototype_texts()
+        for (cat_code, sub_code), texts in sub_texts.items():
+            if not texts:
+                logger.warning(
+                    f"Subcategoría {cat_code}/{sub_code} sin texto prototipo "
+                    f"ni metadata utilizable."
+                )
+                continue
+            try:
+                vecs = self.encoder.encode(texts, batch_size=16)
+                centroid = vecs.mean(axis=0)
+                norm = np.linalg.norm(centroid)
+                if norm == 0:
+                    continue
+                self._sub_prototypes[sub_code] = centroid / (norm + 1e-9)
+            except Exception as e:
+                logger.error(
+                    f"Error encoding sub-prototypes {cat_code}/{sub_code}: {e}"
+                )
+
+        logger.info(
+            f"Prototipos de subcategoría calculados: {len(self._sub_prototypes)}."
+        )
+
+    def predict_subcategories(self, text: str) -> dict[str, float]:
+        """
+        Devuelve {sub_code: score} en [0, 1] usando similitud coseno con los
+        prototipos por subcategoría. Útil para evaluación contra GT multi-label.
+        """
+        self._build_sub_prototypes()
+        if not self._sub_prototypes:
+            return {}
+
+        query_vec = self.encoder.encode_for_query(text)
+        norm_q = np.linalg.norm(query_vec)
+        if norm_q == 0:
+            return {sub: 0.0 for sub in self._sub_prototypes}
+
+        query_vec_n = query_vec / norm_q
+        scores: dict[str, float] = {}
+        for sub_code, proto in self._sub_prototypes.items():
+            sim = float(np.dot(query_vec_n, proto))
+            scores[sub_code] = round((sim + 1.0) / 2.0, 4)
+        return scores

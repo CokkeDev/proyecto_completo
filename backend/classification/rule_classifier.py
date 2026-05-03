@@ -123,8 +123,14 @@ class RuleBasedClassifier:
         if _has_any(t, [
             r"proteccion\s+de\s+los\s+derechos\s+del\s+consumidor|ley\s+19\.496",
             r"consumidor|proveedor|boleta|factura|transaccion\s+comercial",
-            r"impuesto|tributacion|\biva\b|renta|\bsii\b|sistema\s+financiero",
+            r"impuesto|tributaci[oó]n|\biva\b|renta|\bsii\b|sistema\s+financiero",
             r"libre\s+competencia|colusion|\bfne\b|\btdlc\b|mercado",
+            # Lenguaje tributario explícito (señales fuertes)
+            r"c[oó]digo\s+tributario|obligaci[oó]n(es)?\s+tributaria(s)?",
+            r"contribuyente(s)?|responsabilidad\s+fiscal",
+            r"evasi[oó]n\s+(fiscal|tributaria|de\s+impuestos)",
+            r"elusi[oó]n\s+(fiscal|tributaria)",
+            r"secreto\s+bancario|intercambio\s+de\s+informaci[oó]n\s+tributaria",
         ]):
             scores["ECONOMIA_FINANZAS"] = scores.get("ECONOMIA_FINANZAS", 0.0) + 0.22
 
@@ -158,8 +164,10 @@ class RuleBasedClassifier:
             r"salud\s+publica|hospital|paciente|fonasa|isapre|ges|auge",
             r"medicamento|farmacia|farmaco|receta\s+medica|salud\s+mental",
             r"trasplante|donacion\s+de\s+organos",
+            r"donacion\s+(altruista\s+)?(de\s+)?sangre|banco\s+de\s+sangre",
+            r"donante(s)?\s+(de\s+)?(sangre|organos?)",
             r"lista\s+de\s+espera\s+(quirurgica|medica|hospitalaria)",
-            r"paciente(s)?|prestacion(es)?\s+de\s+salud",  
+            r"paciente(s)?|prestacion(es)?\s+de\s+salud",
             r"pandemia|covid|vacuna|emergencia\s+sanitaria",
         ]):
             scores["SALUD_PUBLICA"] = scores.get("SALUD_PUBLICA", 0.0) + 0.24
@@ -175,9 +183,10 @@ class RuleBasedClassifier:
         if _has_any(t, [
             r"ley\s+18\.290|licencia\s+de\s+conducir|transito\s+vial",
             r"transporte\s+publico|transporte\s+remunerado\s+de\s+pasajeros",
-            r"vehiculo(s)?\s+(motorizados?|electricos?)|motocicleta(s)?",
-            r"transporte\s+publico|pasajeros?|conductores?|motocicleta|buses?|taxis?",
-            r"aviacion|aeronautico|puertos?|maritimo|ferrocarril|metro",
+            r"veh[ií]culo(s)?\s+(motorizados?|electricos?)|motocicleta(s)?",
+            r"transporte\s+publico|pasajeros?|conductores?|motocicleta|\bbuses?\b|\btaxis?\b",
+            r"aviaci[oó]n|aeron[aá]utico|puertos?|mar[ií]timo|ferrocarril",
+            r"\bmetro\s+(de|del|el|en|para|que)\b",  # "metro" solo con contexto
         ]):
             scores["TRANSPORTE"] = scores.get("TRANSPORTE", 0.0) + 0.20
 
@@ -196,10 +205,22 @@ class RuleBasedClassifier:
             ("VIVIENDA_URBANISMO", [r"subsidio\s+habitacional", r"plan\s+regulador", r"ley\s+general\s+de\s+urbanismo"]),
             ("MEDIO_AMBIENTE", [r"servicio\s+de\s+biodiversidad", r"areas?\s+protegidas?", r"codigo\s+de\s+aguas"]),
             ("EDUCACION", [r"ley\s+general\s+de\s+educacion", r"establecimiento\s+educacional", r"educacion\s+superior"]),
-            ("SALUD_PUBLICA", [r"fonasa|isapre|ges|auge", r"donacion\s+de\s+organos|trasplante"]),
+            ("SALUD_PUBLICA", [
+                r"fonasa|isapre|ges|auge",
+                r"donacion\s+de\s+organos|trasplante",
+                r"donacion\s+(altruista\s+)?(de\s+)?sangre|banco\s+de\s+sangre",
+            ]),
             ("SEGURIDAD_JUSTICIA", [r"codigo\s+penal|codigo\s+procesal\s+penal", r"prision\s+preventiva"]),
             ("DERECHO_LABORAL_EMPLEO", [r"codigo\s+del\s+trabajo", r"permiso\s+laboral|fuero\s+laboral"]),
             ("INSTITUCIONALIDAD_ESTADO", [r"reforma\s+constitucional", r"carta\s+fundamental", r"acceso\s+a\s+la\s+informacion\s+publica"]),
+            ("ECONOMIA_FINANZAS", [
+                r"c[oó]digo\s+tributario",
+                r"obligaci[oó]n(es)?\s+tributaria(s)?",
+                r"evasi[oó]n\s+(fiscal|tributaria|de\s+impuestos)",
+                r"elusi[oó]n\s+(fiscal|tributaria)",
+                r"\bSII\b|servicio\s+de\s+impuestos\s+internos",
+                r"reforma\s+tributaria",
+            ]),
         ]
         for cat, patterns in strong_overrides:
             if _has_any(t, patterns):
@@ -217,3 +238,19 @@ class RuleBasedClassifier:
         cat_scores = self.predict(text)
         sub_scores = self.taxonomy.match_rules_detailed(text)
         return cat_scores, sub_scores
+
+    def predict_subcategories(self, text: str) -> dict[str, float]:
+        """
+        Retorna {sub_code: score} aplanado para TODAS las subcategorías que
+        hicieron match. Útil para evaluar contra ground truth multi-label
+        cuyos labels son subcategorías.
+        """
+        detailed = self.taxonomy.match_rules_detailed(text)
+        flat: dict[str, float] = {}
+        for _cat, subs in detailed.items():
+            for sub_code, score in subs.items():
+                # Si una subcategoría aparece en más de una rama (no debería),
+                # nos quedamos con el score más alto.
+                if score > flat.get(sub_code, 0.0):
+                    flat[sub_code] = float(score)
+        return flat
